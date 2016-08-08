@@ -54,31 +54,31 @@ public class Settings extends RealmObject{
         super();
         if(mode.equals("new")) {
             key = 1;
-            updatesEnabled = true;
+            updatesEnabled = false;
             boundingBoxEnabled = false;
             drivingModeEnabled = false;
             forceEnglishNames = false;
             enableLowMemory = true;
             scanValue = 4;
-            serverRefresh = 3;
-            scale = 2;
+            serverRefresh = 11;
+            scale = 1;
             mapRefresh = 2;
             lastUsername = "";
             useOldMapMarker = false;
             shuffleIcons = false;
             showLuredPokemon = true;
-            neutralGymsEnabled = true;
-            yellowGymsEnabled = true;
-            blueGymsEnabled = true;
-            redGymsEnabled = true;
+            neutralGymsEnabled = false;
+            yellowGymsEnabled = false;
+            blueGymsEnabled = false;
+            redGymsEnabled = false;
             guardPokemonMinCp = 1;
             guardPokemonMaxCp = 1999;
-            luredPokestopsEnabled = true;
-            normalPokestopsEnabled = true;
+            luredPokestopsEnabled = false;
+            normalPokestopsEnabled = false;
         }
     }
 
-    //This constructor is used in onder to get a non-updating realm object
+    //This constructor is used in order to get a non-updating realm object
     public Settings(Settings settings) {
         this.key = settings.key;
         this.updatesEnabled = settings.updatesEnabled;
