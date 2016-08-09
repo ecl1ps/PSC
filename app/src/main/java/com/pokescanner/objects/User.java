@@ -56,7 +56,10 @@ public class User extends RealmObject {
         JSONObject result = new JSONObject();
         result.put("username", username);
         result.put("password", password);
-        result.put("token", token);
+        if (token != null)
+        {
+            result.put("token", token.toJSONObject());
+        }
         result.put("authType", authType);
         result.put("status", status);
         return result;

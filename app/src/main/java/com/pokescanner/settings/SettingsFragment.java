@@ -367,12 +367,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         SettingsUtil.saveSettings(mContext,new Settings(
                 1,
-                sharedPreferences.getBoolean(SettingsUtil.ENABLE_UPDATES,true),
+                sharedPreferences.getBoolean(SettingsUtil.ENABLE_UPDATES, true),
                 sharedPreferences.getBoolean(SettingsUtil.KEY_BOUNDING_BOX, false),
                 sharedPreferences.getBoolean(SettingsUtil.DRIVING_MODE, false),
-                sharedPreferences.getBoolean(SettingsUtil.FORCE_ENGLISH_NAMES,false),
-                sharedPreferences.getBoolean(SettingsUtil.ENABLE_LOW_MEMORY,true),
-                Integer.valueOf(sharedPreferences.getString(SettingsUtil.SCAN_VALUE,"4")),
+                sharedPreferences.getBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, false),
+                sharedPreferences.getBoolean(SettingsUtil.ENABLE_LOW_MEMORY, true),
+                Integer.valueOf(sharedPreferences.getString(SettingsUtil.SCAN_VALUE, "4")),
                 Integer.valueOf(sharedPreferences.getString(SettingsUtil.SERVER_REFRESH_RATE, "11")),
                 Integer.valueOf(sharedPreferences.getString(SettingsUtil.POKEMON_ICON_SCALE, "2")),
                 Integer.valueOf(sharedPreferences.getString(SettingsUtil.MAP_REFRESH_RATE, "2")),
