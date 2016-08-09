@@ -22,7 +22,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @ToString
-@EqualsAndHashCode(callSuper = false,exclude = {"token","status","authType","lastScan"})
+@EqualsAndHashCode(callSuper = false,exclude = {"token","status","authType"})
 public class User extends RealmObject {
     static public final int PTC = 0;
     static public final int GOOGLE = 1;

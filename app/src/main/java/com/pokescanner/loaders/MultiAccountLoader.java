@@ -25,7 +25,8 @@ public class MultiAccountLoader {
         double dividedValue = (float) scanMap.size()/userSize;
         int scanMapSplitSize = (int) Math.ceil(dividedValue);
 
-        System.out.println("Divided Value:"+dividedValue);
+        System.out.println("Divided Value:" + dividedValue + "(scanMap.size() = " + scanMap.size()
+                         + "; userSize = " + userSize +  ")");
 
         scanMaps = MyPartition.partition(scanMap,scanMapSplitSize);
 

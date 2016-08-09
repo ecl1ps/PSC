@@ -9,7 +9,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pokescanner.R;
-import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.DrawableUtils;
 
 import org.joda.time.DateTime;

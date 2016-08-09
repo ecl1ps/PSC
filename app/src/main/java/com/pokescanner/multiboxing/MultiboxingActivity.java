@@ -1,7 +1,5 @@
 package com.pokescanner.multiboxing;
 
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.v7.app.AlertDialog;

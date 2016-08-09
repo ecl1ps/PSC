@@ -14,9 +14,6 @@ import com.pokescanner.utils.UiUtils;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
-import org.joda.time.Interval;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import io.realm.RealmObject;
 import io.realm.annotations.Index;

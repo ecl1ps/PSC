@@ -245,6 +245,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             if (scanPosition != null) {
                 scanMap = makeHexScanMap(scanPosition, scanValue, 1, new ArrayList<LatLng>());
+
                 if (scanMap != null) {
                     //Pull our users from the realm
                     ArrayList<User> users = new ArrayList<>(realm.copyFromRealm(realm.where(User.class).findAll()));

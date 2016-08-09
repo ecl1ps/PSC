@@ -18,7 +18,6 @@ import android.widget.ProgressBar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.pokescanner.events.ScanCircleEvent;
 import com.pokescanner.helper.PokeDistanceSorter;

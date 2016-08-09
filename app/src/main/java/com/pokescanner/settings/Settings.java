@@ -1,7 +1,5 @@
 package com.pokescanner.settings;
 
-import android.content.Context;
-
 import com.pokescanner.utils.SettingsUtil;
 
 import org.json.JSONException;

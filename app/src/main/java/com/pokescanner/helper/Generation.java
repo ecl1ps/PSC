@@ -1,10 +1,7 @@
 package com.pokescanner.helper;
 
-import android.support.v4.content.res.ResourcesCompat;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.pokescanner.R;
 
 import java.util.Arrays;
 import java.util.List;

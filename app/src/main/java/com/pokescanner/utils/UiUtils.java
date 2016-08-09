@@ -9,7 +9,6 @@ import com.pokescanner.helper.PokemonListLoader;
 import com.pokescanner.objects.FilterItem;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
-import com.pokescanner.settings.Settings;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
