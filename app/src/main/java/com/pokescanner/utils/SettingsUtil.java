@@ -90,16 +90,19 @@ public class SettingsUtil {
         dialog.show();
     }
 
-    public static Settings getSettings(Context context) {
-        Realm realm = Realm.getDefaultInstance();
-        Settings currentSettings = realm.where(Settings.class).findFirst();
-        realm.close();
-        if(currentSettings == null)
-            currentSettings = new Settings("new");
-        return new Settings(currentSettings);
+    public static Settings getSettings() {
+        Realm localRealm = Realm.getDefaultInstance();
+        if (localRealm.where(Settings.class).findFirst() == null)
+        {
+            localRealm.close();
+            return new Settings();
+        }
+        Settings localSettings = localRealm.copyFromRealm(localRealm.where(Settings.class).findFirst());
+        localRealm.close();
+        return new Settings(localSettings);
     }
 
-    public static void saveSettings(Context context, final Settings settings) {
+    public static void saveSettings(final Settings settings) {
         Realm realm = Realm.getDefaultInstance();
         realm.executeTransaction(new Realm.Transaction() {
             @Override

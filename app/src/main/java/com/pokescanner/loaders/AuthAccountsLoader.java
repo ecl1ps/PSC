@@ -19,34 +19,34 @@ public class AuthAccountsLoader extends Thread {
 
     @Override
     public void run() {
-            Realm realm = Realm.getDefaultInstance();
-            List<User> users = realm.copyFromRealm(realm.where(User.class).findAll());
+        Realm realm = Realm.getDefaultInstance();
+        List<User> users = realm.copyFromRealm(realm.where(User.class).findAll());
 
-            for (User user: users) {
-                user.setStatus(User.STATUS_UNKNOWN);
-            }
+        for (User user: users) {
+            user.setStatus(User.STATUS_UNKNOWN);
+        }
 
-            realm.beginTransaction();
-            realm.copyToRealmOrUpdate(users);
-            realm.commitTransaction();
+        realm.beginTransaction();
+        realm.copyToRealmOrUpdate(users);
+        realm.commitTransaction();
 
-            OkHttpClient client = new OkHttpClient();
-            for (User user: users) {
-                try {
-                    PtcCredentialProvider ptcCredentialProvider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
-                    sleep(300);
-                    if (ptcCredentialProvider.getAuthInfo().hasToken()) {
-                        user.setStatus(User.STATUS_VALID);
-                    } else {
-                        user.setStatus(User.STATUS_INVALID);
-                    }
-                } catch (RemoteServerException | LoginFailedException e) {
+        OkHttpClient client = new OkHttpClient();
+        for (User user: users) {
+            try {
+                PtcCredentialProvider ptcCredentialProvider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
+                sleep(300);
+                if (ptcCredentialProvider.getAuthInfo().hasToken()) {
+                    user.setStatus(User.STATUS_VALID);
+                } else {
                     user.setStatus(User.STATUS_INVALID);
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (RemoteServerException | LoginFailedException e) {
+                user.setStatus(User.STATUS_INVALID);
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+        }
 
         realm.beginTransaction();
         realm.copyToRealmOrUpdate(users);

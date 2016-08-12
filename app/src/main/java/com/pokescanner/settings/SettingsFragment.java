@@ -101,29 +101,29 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         setupToolbar();
         preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         preferences.registerOnSharedPreferenceChangeListener(this);
-        Settings settings = SettingsUtil.getSettings(mContext);
+        Settings currentSettings = SettingsUtil.getSettings();
 
         preferences.edit()
-                .putBoolean(SettingsUtil.ENABLE_UPDATES,settings.isUpdatesEnabled())
-                .putBoolean(SettingsUtil.ENABLE_LOW_MEMORY,settings.isEnableLowMemory())
-                .putBoolean(SettingsUtil.KEY_BOUNDING_BOX,settings.isBoundingBoxEnabled())
-                .putBoolean(SettingsUtil.FORCE_ENGLISH_NAMES,settings.isForceEnglishNames())
-                .putString(SettingsUtil.SCAN_VALUE,String.valueOf(settings.getScanValue()))
-                .putString(SettingsUtil.SERVER_REFRESH_RATE,String.valueOf(settings.getServerRefresh()))
-                .putString(SettingsUtil.MAP_REFRESH_RATE,String.valueOf(settings.getMapRefresh()))
-                .putString(SettingsUtil.POKEMON_ICON_SCALE,String.valueOf(settings.getScale()))
-                .putString(SettingsUtil.LAST_USERNAME,settings.getLastUsername())
-                .putBoolean(SettingsUtil.KEY_OLD_MARKER,settings.isUseOldMapMarker())
-                .putBoolean(SettingsUtil.SHUFFLE_ICONS,settings.isShuffleIcons())
-                .putBoolean(SettingsUtil.SHOW_LURED_POKEMON,settings.isShowLuredPokemon())
-                .putBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS,settings.isNeutralGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_YELLOW_GYMS,settings.isYellowGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_BLUE_GYMS,settings.isBlueGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_RED_GYMS,settings.isRedGymsEnabled())
-                .putInt(SettingsUtil.GUARD_MIN_CP,settings.getGuardPokemonMinCp())
-                .putInt(SettingsUtil.GUARD_MAX_CP,settings.getGuardPokemonMaxCp())
-                .putBoolean(SettingsUtil.SHOW_LURED_POKESTOPS,settings.isLuredPokestopsEnabled())
-                .putBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS,settings.isNormalPokestopsEnabled())
+                .putBoolean(SettingsUtil.ENABLE_UPDATES, currentSettings.isUpdatesEnabled())
+                .putBoolean(SettingsUtil.ENABLE_LOW_MEMORY, currentSettings.isEnableLowMemory())
+                .putBoolean(SettingsUtil.KEY_BOUNDING_BOX, currentSettings.isBoundingBoxEnabled())
+                .putBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, currentSettings.isForceEnglishNames())
+                .putString(SettingsUtil.SCAN_VALUE, String.valueOf(currentSettings.getScanValue()))
+                .putString(SettingsUtil.SERVER_REFRESH_RATE, String.valueOf(currentSettings.getServerRefresh()))
+                .putString(SettingsUtil.MAP_REFRESH_RATE, String.valueOf(currentSettings.getMapRefresh()))
+                .putString(SettingsUtil.POKEMON_ICON_SCALE, String.valueOf(currentSettings.getScale()))
+                .putString(SettingsUtil.LAST_USERNAME, currentSettings.getLastUsername())
+                .putBoolean(SettingsUtil.KEY_OLD_MARKER, currentSettings.isUseOldMapMarker())
+                .putBoolean(SettingsUtil.SHUFFLE_ICONS, currentSettings.isShuffleIcons())
+                .putBoolean(SettingsUtil.SHOW_LURED_POKEMON, currentSettings.isShowLuredPokemon())
+                .putBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, currentSettings.isNeutralGymsEnabled())
+                .putBoolean(SettingsUtil.SHOW_YELLOW_GYMS, currentSettings.isYellowGymsEnabled())
+                .putBoolean(SettingsUtil.SHOW_BLUE_GYMS, currentSettings.isBlueGymsEnabled())
+                .putBoolean(SettingsUtil.SHOW_RED_GYMS, currentSettings.isRedGymsEnabled())
+                .putInt(SettingsUtil.GUARD_MIN_CP, currentSettings.getGuardPokemonMinCp())
+                .putInt(SettingsUtil.GUARD_MAX_CP, currentSettings.getGuardPokemonMaxCp())
+                .putBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, currentSettings.isLuredPokestopsEnabled())
+                .putBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, currentSettings.isNormalPokestopsEnabled())
                 .commit();
 
         realm = Realm.getDefaultInstance();
@@ -365,7 +365,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        SettingsUtil.saveSettings(mContext,new Settings(
+        SettingsUtil.saveSettings(new Settings(
                 1,
                 sharedPreferences.getBoolean(SettingsUtil.ENABLE_UPDATES, true),
                 sharedPreferences.getBoolean(SettingsUtil.KEY_BOUNDING_BOX, false),

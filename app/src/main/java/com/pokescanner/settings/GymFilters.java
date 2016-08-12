@@ -22,7 +22,7 @@ public class GymFilters
         cpSeekBar.setRangeValues(1, 2000);
 
         //Load saved filters
-        Settings currentSettings = SettingsUtil.getSettings(context);
+        Settings currentSettings = SettingsUtil.getSettings();
         cpSeekBar.setSelectedMinValue(currentSettings.getGuardPokemonMinCp());
         cpSeekBar.setSelectedMaxValue(currentSettings.getGuardPokemonMaxCp());
 
@@ -33,7 +33,7 @@ public class GymFilters
             {
                 int selectedMinValue = (Integer) minValue;
                 int selectedMaxValue = (Integer) maxValue;
-                SettingsUtil.getSettings(context).toBuilder().guardPokemonMinCp(selectedMinValue).guardPokemonMaxCp(selectedMaxValue).build().save(context);
+                SettingsUtil.getSettings().toBuilder().guardPokemonMinCp(selectedMinValue).guardPokemonMaxCp(selectedMaxValue).build().save();
             }
         });
 

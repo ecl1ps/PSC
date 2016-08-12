@@ -46,7 +46,7 @@ public class BlacklistViewHolder extends RecyclerView.ViewHolder {
         String uri;
         int pokemonnumber = filterItem.getNumber();
 
-        if (SettingsUtil.getSettings(context).isShuffleIcons()) {
+        if (SettingsUtil.getSettings().isShuffleIcons()) {
             uri = "ps" + pokemonnumber;
         }
         else uri = "p" + pokemonnumber;

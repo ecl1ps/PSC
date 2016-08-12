@@ -124,7 +124,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         try {
             //Get settings
-            Settings currentSettings = SettingsUtil.getSettings(mContext);
+            Settings currentSettings = SettingsUtil.getSettings();
             JSONObject coreSettings = currentSettings.toJSONObject();
             backupObject.put(coreSettingsKey, coreSettings);
 

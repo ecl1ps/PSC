@@ -239,7 +239,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 e.printStackTrace();
             }
 
-            if (SettingsUtil.getSettings(MapsActivity.this).isDrivingModeEnabled() && moveCameraToCurrentPosition(false)) {
+            if (SettingsUtil.getSettings().isDrivingModeEnabled() && moveCameraToCurrentPosition(false)) {
                 scanPosition = getCurrentLocation();
             }
 
@@ -495,7 +495,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //Returns true if gym is to be shown
     public boolean shouldGymBeFiltered(Gym gym) {
-        Settings currentSettings = SettingsUtil.getSettings(MapsActivity.this);
+        Settings currentSettings = SettingsUtil.getSettings();
         int guardPokemonCp = gym.getGuardPokemonCp();
         int minCp = currentSettings.getGuardPokemonMinCp();
         int maxCp = currentSettings.getGuardPokemonMaxCp();
@@ -524,7 +524,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public boolean shouldPokestopBeFiltered(PokeStop pokeStop){
-        Settings currentSettings = SettingsUtil.getSettings(MapsActivity.this);
+        Settings currentSettings = SettingsUtil.getSettings();
         if(pokeStop.isHasLureInfo() && !currentSettings.isLuredPokestopsEnabled())
             return false;
         if(!pokeStop.isHasLureInfo() && !currentSettings.isNormalPokestopsEnabled())
@@ -535,7 +535,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     public void createMapObjects() {
-        if (SettingsUtil.getSettings(this).isBoundingBoxEnabled()) {
+        if (SettingsUtil.getSettings().isBoundingBoxEnabled()) {
             createBoundingBox();
         } else {
             removeBoundingBox();
@@ -549,7 +549,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             gymstopRefresher.unsubscribe();
 
         //Using RX java we setup an interval to refresh the map
-        pokeonRefresher = Observable.interval(SettingsUtil.getSettings(this).getMapRefresh(), TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+        pokeonRefresher = Observable.interval(SettingsUtil.getSettings().getMapRefresh(), TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {

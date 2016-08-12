@@ -62,7 +62,7 @@ public class DrawableUtils
     public static int getResourceID(int pokemonid,Context context) {
         String uri = "p" + pokemonid;
 
-        if (SettingsUtil.getSettings(context).isShuffleIcons()) {
+        if (SettingsUtil.getSettings().isShuffleIcons()) {
             uri = "ps" + pokemonid;
         }
 
