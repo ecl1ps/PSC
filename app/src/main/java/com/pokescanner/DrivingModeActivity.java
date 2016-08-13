@@ -35,6 +35,7 @@ import com.pokescanner.loaders.MultiAccountLoader;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
 import com.pokescanner.settings.Settings;
+import com.pokescanner.settings.SettingsFragment;
 import com.pokescanner.utils.PermissionUtils;
 import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
@@ -121,8 +122,9 @@ public class DrivingModeActivity extends AppCompatActivity implements GoogleApiC
                 pos = 1;
                 progressBar.setProgress(0);
                 //Get our scale for range
-                int scale = Settings.get(this).getScanValue();
-                int SERVER_REFRESH_RATE = Settings.get(this).getServerRefresh();
+                Settings currentSettings = SettingsUtil.getSettings();
+                int scale = currentSettings.getScanValue();
+                int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
                 //pull our GPS location
                 LatLng scanPosition = getCurrentLocation();
 
@@ -239,7 +241,7 @@ public class DrivingModeActivity extends AppCompatActivity implements GoogleApiC
 
     @OnLongClick(R.id.btnAutoScan)
     public boolean onClickButton() {
-        SettingsUtil.searchRadiusDialog(this);
+        SettingsFragment.searchRadiusDialog(this);
         return true;
     }
 

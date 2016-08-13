@@ -29,80 +29,21 @@ public class SettingsUtil {
     public static final String SHOW_LURED_POKESTOPS = "showLuredPokestops";
     public static final String SHOW_NORMAL_POKESTOPS = "showNormalPokestops";
 
-    public static void searchRadiusDialog(final Context context) {
-        int scanValue = Settings.get(context).getScanValue();
-
-        final AppCompatDialog dialog = new AppCompatDialog(context);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_search_radius);
-
-        final SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.seekBar);
-        Button btnSave = (Button) dialog.findViewById(R.id.btnAccept);
-        Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
-        final TextView tvNumber = (TextView) dialog.findViewById(R.id.tvNumber);
-        final TextView tvEstimate = (TextView) dialog.findViewById(R.id.tvEstimate);
-        tvNumber.setText(String.valueOf(scanValue));
-        tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(scanValue,context));
-        seekBar.setProgress(scanValue);
-        seekBar.setMax(12);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                tvNumber.setText(String.valueOf(i));
-                tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(i,context));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int scanOut = 4;
-                int saveValue = seekBar.getProgress();
-                if (saveValue == 0) {
-                    scanOut = 1;
-                } else {
-                    scanOut = saveValue;
-                }
-                context.getSharedPreferences(context.getString(R.string.shared_key), Context.MODE_PRIVATE)
-                        .edit()
-                        .putInt(SCAN_VALUE,scanOut)
-                        .apply();
-                dialog.dismiss();
-            }
-        });
-
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
-    }
-
-    public static Settings getSettings() {
-        Realm localRealm = Realm.getDefaultInstance();
-        if (localRealm.where(Settings.class).findFirst() == null)
+    public static Settings getSettings()
+    {
+        Realm realm = Realm.getDefaultInstance();
+        if (realm.where(Settings.class).findFirst() == null)
         {
-            localRealm.close();
+            realm.close();
             return new Settings();
         }
-        Settings localSettings = localRealm.copyFromRealm(localRealm.where(Settings.class).findFirst());
-        localRealm.close();
-        return new Settings(localSettings);
+        Settings currentSettings = realm.copyFromRealm(realm.where(Settings.class).findFirst());
+        realm.close();
+        return new Settings(currentSettings);
     }
 
-    public static void saveSettings(final Settings settings) {
+    public static void saveSettings(final Settings settings)
+    {
         Realm realm = Realm.getDefaultInstance();
         realm.executeTransaction(new Realm.Transaction() {
             @Override

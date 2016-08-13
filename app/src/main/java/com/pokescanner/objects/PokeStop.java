@@ -74,7 +74,8 @@ public class PokeStop extends RealmObject
         MarkerOptions pokestopMarker = new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context)))
                 .position(position);
-        if(Settings.get(context).isUseOldMapMarker()){
+        if (SettingsUtil.getSettings().isUseOldMapMarker())
+        {
             pokestopMarker.title("Pokestop");
             pokestopMarker.snippet(snippetMessage);
         }

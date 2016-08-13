@@ -74,7 +74,7 @@ public class PokemonListLoader {
     }
 
     private static void translateNamesIfNeeded(Context context, ArrayList<FilterItem> filterItems) {
-        if (!Settings.get(context).isForceEnglishNames()) {
+        if (!SettingsUtil.getSettings().isForceEnglishNames()) {
             for (FilterItem item : filterItems) {
                 String identifierName = "p" + Integer.toString(item.getNumber());
                 int resourceID = context.getResources().getIdentifier(identifierName, "string", context.getPackageName());

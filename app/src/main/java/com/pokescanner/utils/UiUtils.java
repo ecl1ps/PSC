@@ -30,7 +30,7 @@ public class UiUtils {
     }
 
     public static String getSearchTime(int val,Context context) {
-        int serverRefreshValue = (BASE_DELAY * Settings.get(context).getServerRefresh());
+        int serverRefreshValue = (BASE_DELAY * SettingsUtil.getSettings().getServerRefresh());
         int serverDividedValue = serverRefreshValue / Realm.getDefaultInstance().where(User.class).findAll().size();
         int calculatedValue = hexagonal_number(val) * serverDividedValue;
         System.out.println(serverRefreshValue + " " + serverDividedValue + " " + calculatedValue);

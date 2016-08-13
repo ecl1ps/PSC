@@ -47,6 +47,8 @@ public class Settings extends RealmObject{
     //Used when the app is loaded for the first time
     public Settings() {
         super();
+
+        // Settings default values
         key = 1;
         updatesEnabled = false;
         boundingBoxEnabled = false;
@@ -96,12 +98,9 @@ public class Settings extends RealmObject{
         this.normalPokestopsEnabled = settings.normalPokestopsEnabled;
     }
 
-    public void save() {
+    public void save()
+    {
         SettingsUtil.saveSettings(this);
-    }
-
-    public static Settings get(Context context) {
-        return SettingsUtil.getSettings();
     }
 
     public JSONObject toJSONObject() throws JSONException{
