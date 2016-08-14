@@ -63,7 +63,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         MultiDex.install(this);
         super.onCreate(savedInstanceState);
-        //Crashlytics initialization
+        // Crashlytics initialization
         if (!BuildConfig.DEBUG)
             Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash_screen);

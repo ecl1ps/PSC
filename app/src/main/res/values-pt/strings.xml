@@ -1,10 +1,8 @@
 <resources>
-    <string name="shared_key" translatable="false">POKESCANNER</string>
     <string name="title_activity_maps">Mapa</string>
     <string name="scan">Pesquisar</string>
     <string name="ptclogin">Login PTC</string>
     <string name="googlelogin">Login Google</string>
-    <string name="poke_scanner" translatable="false">PokéScanner</string>
     <string name="blacklist">Lita Negra</string>
     <string name="save">Guardar</string>
     <string name="search_radius">Raio de Pesquisa</string>
@@ -48,7 +46,6 @@
     <string name="red_team">Equipa Vermelha</string>
     <string name="neutral_gyms">Ginásios Neutros</string>
     <string name="guard_pokemon_cp">CP de Pokémon de Guarda</string>
-    <string name="_0" translatable="false">0</string>
     <string name="expiration_time">Esconder Pokémon que expiram em</string>
     <string name="expiration_min">Mín:</string>
     <string name="expiration_max">Máx:</string>
@@ -134,7 +131,7 @@
     <string name="update_check_failed">Falha na verificação de atualização.</string>
     <string name="changes">Alterações:</string>
     <string name="update_available_long">está disponível.</string>
-    
+
     <string name="category_range">Opções de Alcance</string>
     <string name="category_update">Opções de Atualização</string>
     <string name="category_range_options">Opções de Alcance</string>
@@ -157,7 +154,7 @@
 
     <string name="auto_update_denied">Permissão recusada! A desativar auto-atualização :(</string>
     <string name="location_denied">A app não funcionará sem localização!</string>
-    
+
     <string name="Force_English_Names">Forçar nomes em Inglês</string>
     <string name="Force_English_Names_desc">Força os nomes dos Pokémon a serem exibidos em Inglês.</string>
 
