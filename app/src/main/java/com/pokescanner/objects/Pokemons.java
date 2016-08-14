@@ -37,7 +37,8 @@ public class Pokemons  extends RealmObject{
     @PrimaryKey
     long encounterid;
     long expires;
-    double longitude,latitude;
+    double longitude;
+    double latitude;
     double distance;
 
     public Pokemons() {}
@@ -73,11 +74,11 @@ public class Pokemons  extends RealmObject{
         MarkerOptions pokeIcon = new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromBitmap(out))
                 .draggable(true)
+                .anchor(0.5f, 0.5f) // Center image to position
                 .position(position);
         if (SettingsUtil.getSettings().isUseOldMapMarker())
         {
             pokeIcon.title(getName());
-            pokeIcon.draggable(true);
             pokeIcon.snippet(context.getText(R.string.expires_in) + timeOut);
         }
 
