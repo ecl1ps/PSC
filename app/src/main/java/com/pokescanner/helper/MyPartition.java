@@ -9,7 +9,7 @@ public class MyPartition {
         if (list == null)
             throw new NullPointerException("'list' must not be null");
         if (!(size > 0))
-            throw new IllegalArgumentException("'size' must be greater than 0");
+            throw new IllegalArgumentException("'size' must be greater than 0 got " + size);
 
         return new Partition<>(list, size);
     }

@@ -18,7 +18,6 @@ import android.widget.ProgressBar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.pokescanner.events.ScanCircleEvent;
 import com.pokescanner.helper.PokeDistanceSorter;
@@ -29,6 +28,7 @@ import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
 import com.pokescanner.recycler.ListViewRecyclerAdapter;
 import com.pokescanner.settings.Settings;
+import com.pokescanner.settings.SettingsFragment;
 import com.pokescanner.utils.PermissionUtils;
 import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
@@ -183,9 +183,10 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
             if (!MultiAccountLoader.areThreadsRunning()) {
                 pos = 1;
                 progressBar.setProgress(0);
+                Settings currentSettings = SettingsUtil.getSettings();
                 //Get our scale for range
-                int scale = Settings.get(this).getScanValue();
-                int SERVER_REFRESH_RATE = Settings.get(this).getServerRefresh();
+                int scale = currentSettings.getScanValue();
+                int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
                 //pull our GPS location
                 LatLng scanPosition = getCurrentLocation();
 
@@ -247,7 +248,7 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
 
     @OnLongClick(R.id.btnAutoScan)
     public boolean onClickButton() {
-        SettingsUtil.searchRadiusDialog(this);
+        SettingsFragment.searchRadiusDialog(this);
         return true;
     }
 

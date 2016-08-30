@@ -68,6 +68,7 @@ import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
 import com.pokescanner.settings.Settings;
 import com.pokescanner.settings.SettingsActivity;
+import com.pokescanner.settings.SettingsFragment;
 import com.pokescanner.utils.DrawableUtils;
 import com.pokescanner.utils.MarkerDetails;
 import com.pokescanner.utils.PermissionUtils;
@@ -219,14 +220,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (SCANNING_STATUS) {
             stopPokeScan();
         } else {
+            Settings currentSettings = SettingsUtil.getSettings();
             //Progress Bar Related Stuff
             pos = 1;
-            int SERVER_REFRESH_RATE = Settings.get(this).getServerRefresh();
+            int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
 
             System.out.println(SERVER_REFRESH_RATE);
 
             progressBar.setProgress(0);
-            int scanValue = Settings.get(this).getScanValue();
+            int scanValue = currentSettings.getScanValue();
             showProgressbar(true);
             //get our camera position
             LatLng scanPosition = null;
@@ -239,12 +241,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 e.printStackTrace();
             }
 
-            if (SettingsUtil.getSettings(MapsActivity.this).isDrivingModeEnabled() && moveCameraToCurrentPosition(false)) {
+            if (SettingsUtil.getSettings().isDrivingModeEnabled() && moveCameraToCurrentPosition(false)) {
                 scanPosition = getCurrentLocation();
             }
 
             if (scanPosition != null) {
                 scanMap = makeHexScanMap(scanPosition, scanValue, 1, new ArrayList<LatLng>());
+
                 if (scanMap != null) {
                     //Pull our users from the realm
                     ArrayList<User> users = new ArrayList<>(realm.copyFromRealm(realm.where(User.class).findAll()));
@@ -282,7 +285,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @OnLongClick(R.id.btnSearch)
     public boolean onLongClickSearch() {
-        SettingsUtil.searchRadiusDialog(this);
+        SettingsFragment.searchRadiusDialog(this);
         return true;
     }
 
@@ -453,7 +456,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     removeBoundingBox();
                     LatLng target = getCameraLocation();
                     if (target != null) {
-                        int scanValue = Settings.get(this).getScanValue();
+                        Settings currentSettings = SettingsUtil.getSettings();
+                        int scanValue = currentSettings.getScanValue();
                         List<LatLng> tempScanMap = makeHexScanMap(target, scanValue, 1, new ArrayList<LatLng>());
                         List<LatLng> tempCornerMap = getCorners(tempScanMap);
 
@@ -494,7 +498,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //Returns true if gym is to be shown
     public boolean shouldGymBeFiltered(Gym gym) {
-        Settings currentSettings = SettingsUtil.getSettings(MapsActivity.this);
+        Settings currentSettings = SettingsUtil.getSettings();
         int guardPokemonCp = gym.getGuardPokemonCp();
         int minCp = currentSettings.getGuardPokemonMinCp();
         int maxCp = currentSettings.getGuardPokemonMaxCp();
@@ -523,7 +527,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public boolean shouldPokestopBeFiltered(PokeStop pokeStop){
-        Settings currentSettings = SettingsUtil.getSettings(MapsActivity.this);
+        Settings currentSettings = SettingsUtil.getSettings();
         if(pokeStop.isHasLureInfo() && !currentSettings.isLuredPokestopsEnabled())
             return false;
         if(!pokeStop.isHasLureInfo() && !currentSettings.isNormalPokestopsEnabled())
@@ -534,7 +538,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     public void createMapObjects() {
-        if (SettingsUtil.getSettings(this).isBoundingBoxEnabled()) {
+        if (SettingsUtil.getSettings().isBoundingBoxEnabled()) {
             createBoundingBox();
         } else {
             removeBoundingBox();
@@ -548,7 +552,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             gymstopRefresher.unsubscribe();
 
         //Using RX java we setup an interval to refresh the map
-        pokeonRefresher = Observable.interval(SettingsUtil.getSettings(this).getMapRefresh(), TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+        pokeonRefresher = Observable.interval(SettingsUtil.getSettings().getMapRefresh(), TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {
@@ -599,7 +603,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRestartRefreshEvent(RestartRefreshEvent event) {
-        System.out.println(Settings.get(this).getServerRefresh());
+        System.out.println(SettingsUtil.getSettings().getServerRefresh());
         refreshGymsAndPokestops();
         refreshMap();
         startRefresher();
@@ -856,7 +860,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }
                 if (markerKey != null) {
-                    if (!Settings.get(MapsActivity.this).isUseOldMapMarker()) {
+                    if (!SettingsUtil.getSettings().isUseOldMapMarker()) {
                         removeAdapterAndListener();
                         MarkerDetails.showMarkerDetailsDialog(MapsActivity.this, markerKey);
                     } else {
@@ -878,7 +882,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng GPS_LOCATION = getCurrentLocation();
         if (GPS_LOCATION != null) {
             if (mMap != null) {
-                if (zoom || Settings.get(this).isDrivingModeEnabled()) {
+                if (zoom || SettingsUtil.getSettings().isDrivingModeEnabled()) {
                     this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(GPS_LOCATION,15));
                 } else {
                     this.mMap.animateCamera(CameraUpdateFactory.newLatLng(GPS_LOCATION));

@@ -5,8 +5,6 @@ import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import com.pokescanner.objects.User;
 
-import java.util.List;
-
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
 

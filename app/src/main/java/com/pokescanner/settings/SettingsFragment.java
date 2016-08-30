@@ -48,14 +48,19 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import io.realm.Realm;
 
-public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
-
+public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener
+{
     SharedPreferences preferences;
-    Preference scan_dialog, gym_cp_filter,expiration_filter;
-    Preference clear_pokemon,clear_gyms,clear_pokestops;
-    Preference pokemon_blacklist, update,serve_refresh_rate_dialog;
+    Preference scan_dialog;
+    Preference gym_cp_filter;
+    Preference expiration_filter;
+    Preference clear_pokemon;
+    Preference clear_gyms;
+    Preference clear_pokestops;
+    Preference pokemon_blacklist;
+    Preference update;
+    Preference serve_refresh_rate_dialog;
     Realm realm;
-    int scanValue;
     private Context mContext;
     private View rootView;
     boolean donation = false;
@@ -101,30 +106,30 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         setupToolbar();
         preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         preferences.registerOnSharedPreferenceChangeListener(this);
-        Settings settings = SettingsUtil.getSettings(mContext);
+        Settings currentSettings = SettingsUtil.getSettings();
 
         preferences.edit()
-                .putBoolean(SettingsUtil.ENABLE_UPDATES,settings.isUpdatesEnabled())
-                .putBoolean(SettingsUtil.ENABLE_LOW_MEMORY,settings.isEnableLowMemory())
-                .putBoolean(SettingsUtil.KEY_BOUNDING_BOX,settings.isBoundingBoxEnabled())
-                .putBoolean(SettingsUtil.FORCE_ENGLISH_NAMES,settings.isForceEnglishNames())
-                .putString(SettingsUtil.SCAN_VALUE,String.valueOf(settings.getScanValue()))
-                .putString(SettingsUtil.SERVER_REFRESH_RATE,String.valueOf(settings.getServerRefresh()))
-                .putString(SettingsUtil.MAP_REFRESH_RATE,String.valueOf(settings.getMapRefresh()))
-                .putString(SettingsUtil.POKEMON_ICON_SCALE,String.valueOf(settings.getScale()))
-                .putString(SettingsUtil.LAST_USERNAME,settings.getLastUsername())
-                .putBoolean(SettingsUtil.KEY_OLD_MARKER,settings.isUseOldMapMarker())
-                .putBoolean(SettingsUtil.SHUFFLE_ICONS,settings.isShuffleIcons())
-                .putBoolean(SettingsUtil.SHOW_LURED_POKEMON,settings.isShowLuredPokemon())
-                .putBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS,settings.isNeutralGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_YELLOW_GYMS,settings.isYellowGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_BLUE_GYMS,settings.isBlueGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_RED_GYMS,settings.isRedGymsEnabled())
-                .putInt(SettingsUtil.GUARD_MIN_CP,settings.getGuardPokemonMinCp())
-                .putInt(SettingsUtil.GUARD_MAX_CP,settings.getGuardPokemonMaxCp())
-                .putBoolean(SettingsUtil.SHOW_LURED_POKESTOPS,settings.isLuredPokestopsEnabled())
-                .putBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS,settings.isNormalPokestopsEnabled())
-                .commit();
+            .putBoolean(SettingsUtil.ENABLE_UPDATES, currentSettings.isUpdatesEnabled())
+            .putBoolean(SettingsUtil.ENABLE_LOW_MEMORY, currentSettings.isEnableLowMemory())
+            .putBoolean(SettingsUtil.KEY_BOUNDING_BOX, currentSettings.isBoundingBoxEnabled())
+            .putBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, currentSettings.isForceEnglishNames())
+            .putInt(SettingsUtil.SCAN_VALUE, currentSettings.getScanValue())
+            .putString(SettingsUtil.SERVER_REFRESH_RATE, String.valueOf(currentSettings.getServerRefresh()))
+            .putString(SettingsUtil.MAP_REFRESH_RATE, String.valueOf(currentSettings.getMapRefresh()))
+            .putString(SettingsUtil.POKEMON_ICON_SCALE, String.valueOf(currentSettings.getScale()))
+            .putString(SettingsUtil.LAST_USERNAME, currentSettings.getLastUsername())
+            .putBoolean(SettingsUtil.KEY_OLD_MARKER, currentSettings.isUseOldMapMarker())
+            .putBoolean(SettingsUtil.SHUFFLE_ICONS, currentSettings.isShuffleIcons())
+            .putBoolean(SettingsUtil.SHOW_LURED_POKEMON, currentSettings.isShowLuredPokemon())
+            .putBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, currentSettings.isNeutralGymsEnabled())
+            .putBoolean(SettingsUtil.SHOW_YELLOW_GYMS, currentSettings.isYellowGymsEnabled())
+            .putBoolean(SettingsUtil.SHOW_BLUE_GYMS, currentSettings.isBlueGymsEnabled())
+            .putBoolean(SettingsUtil.SHOW_RED_GYMS, currentSettings.isRedGymsEnabled())
+            .putInt(SettingsUtil.GUARD_MIN_CP, currentSettings.getGuardPokemonMinCp())
+            .putInt(SettingsUtil.GUARD_MAX_CP, currentSettings.getGuardPokemonMaxCp())
+            .putBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, currentSettings.isLuredPokestopsEnabled())
+            .putBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, currentSettings.isNormalPokestopsEnabled())
+            .commit();
 
         realm = Realm.getDefaultInstance();
 
@@ -152,6 +157,75 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         return rootView;
     }
 
+    public static void searchRadiusDialog(final Context context) {
+        int scanValue = SettingsUtil.getSettings().getScanValue();
+
+        final AppCompatDialog dialog = new AppCompatDialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_search_radius);
+
+        final SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.seekBar);
+        Button btnSave = (Button) dialog.findViewById(R.id.btnAccept);
+        Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
+        final TextView tvNumber = (TextView) dialog.findViewById(R.id.tvNumber);
+        final TextView tvEstimate = (TextView) dialog.findViewById(R.id.tvEstimate);
+
+        assert seekBar != null;
+        assert btnCancel != null;
+        assert btnSave != null;
+        assert tvNumber != null;
+        assert tvEstimate != null;
+
+        tvNumber.setText(String.valueOf(scanValue));
+        tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(scanValue, context));
+        seekBar.setProgress(scanValue);
+        seekBar.setMax(12);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                tvNumber.setText(String.valueOf(i));
+                tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(i, context));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar)
+            {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar)
+            {
+            }
+        });
+
+        btnSave.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                int savedValue = seekBar.getProgress();
+                int scanOut = (savedValue == 0 ? 1 : savedValue);
+
+                PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putInt(SettingsUtil.SCAN_VALUE, scanOut)
+                    .commit();
+                dialog.dismiss();
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
     private void setupToolbar() {
         AppCompatPreferenceActivity activity = (AppCompatPreferenceActivity) getActivity();
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.settingsToolbar);
@@ -163,7 +237,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         bar.setDisplayShowTitleEnabled(true);
         bar.setHomeAsUpIndicator(R.drawable.back_button);
         if (!donation)
+        {
             bar.setTitle(getPreferenceScreen().getTitle());
+        }
     }
 
     private void setupFilterOptions() {
@@ -197,7 +273,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         scan_dialog = getPreferenceManager().findPreference("scan_dialog");
         scan_dialog.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                SettingsUtil.searchRadiusDialog(mContext);
+                SettingsFragment.searchRadiusDialog(mContext);
                 return true;
             }
         });
@@ -364,91 +440,35 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        SettingsUtil.saveSettings(mContext,new Settings(
-                1,
-                sharedPreferences.getBoolean(SettingsUtil.ENABLE_UPDATES,true),
-                sharedPreferences.getBoolean(SettingsUtil.KEY_BOUNDING_BOX, false),
-                sharedPreferences.getBoolean(SettingsUtil.DRIVING_MODE, false),
-                sharedPreferences.getBoolean(SettingsUtil.FORCE_ENGLISH_NAMES,false),
-                sharedPreferences.getBoolean(SettingsUtil.ENABLE_LOW_MEMORY,true),
-                Integer.valueOf(sharedPreferences.getString(SettingsUtil.SCAN_VALUE,"4")),
-                Integer.valueOf(sharedPreferences.getString(SettingsUtil.SERVER_REFRESH_RATE, "11")),
-                Integer.valueOf(sharedPreferences.getString(SettingsUtil.POKEMON_ICON_SCALE, "2")),
-                Integer.valueOf(sharedPreferences.getString(SettingsUtil.MAP_REFRESH_RATE, "2")),
-                sharedPreferences.getString(SettingsUtil.LAST_USERNAME, ""),
-                sharedPreferences.getBoolean(SettingsUtil.KEY_OLD_MARKER, false),
-                sharedPreferences.getBoolean(SettingsUtil.SHUFFLE_ICONS, false),
-                sharedPreferences.getBoolean(SettingsUtil.SHOW_LURED_POKEMON, true),
-                sharedPreferences.getBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, true),
-                sharedPreferences.getBoolean(SettingsUtil.SHOW_YELLOW_GYMS, true),
-                sharedPreferences.getBoolean(SettingsUtil.SHOW_BLUE_GYMS, true),
-                sharedPreferences.getBoolean(SettingsUtil.SHOW_RED_GYMS, true),
-                sharedPreferences.getInt(SettingsUtil.GUARD_MIN_CP, 1),
-                sharedPreferences.getInt(SettingsUtil.GUARD_MAX_CP, 1999),
-                sharedPreferences.getBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, true),
-                sharedPreferences.getBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, true)
-        ));
-    }
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s)
+    {
+        Settings newSettings = SettingsUtil.getSettings();
+        newSettings.setUpdatesEnabled(sharedPreferences.getBoolean(SettingsUtil.ENABLE_UPDATES, newSettings.isUpdatesEnabled()));
+        newSettings.setBoundingBoxEnabled(sharedPreferences.getBoolean(SettingsUtil.KEY_BOUNDING_BOX, newSettings.isBoundingBoxEnabled()));
+        newSettings.setDrivingModeEnabled(sharedPreferences.getBoolean(SettingsUtil.DRIVING_MODE, newSettings.isDrivingModeEnabled()));
+        newSettings.setForceEnglishNames(sharedPreferences.getBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, newSettings.isForceEnglishNames()));
+        newSettings.setEnableLowMemory(sharedPreferences.getBoolean(SettingsUtil.ENABLE_LOW_MEMORY, newSettings.isEnableLowMemory()));
+        newSettings.setScanValue(sharedPreferences.getInt(SettingsUtil.SCAN_VALUE, newSettings.getScanValue()));
+        // TODO: change those values to int
+        newSettings.setServerRefresh(Integer.valueOf(sharedPreferences.getString(SettingsUtil.SERVER_REFRESH_RATE, String.valueOf(newSettings.getServerRefresh()))));
+        newSettings.setScale(Integer.valueOf(sharedPreferences.getString(SettingsUtil.POKEMON_ICON_SCALE, String.valueOf(newSettings.getScale()))));
+        newSettings.setMapRefresh(Integer.valueOf(sharedPreferences.getString(SettingsUtil.MAP_REFRESH_RATE, String.valueOf(newSettings.getMapRefresh()))));
+        // END TODO
+        newSettings.setLastUsername(sharedPreferences.getString(SettingsUtil.LAST_USERNAME, newSettings.getLastUsername()));
+        newSettings.setUseOldMapMarker(sharedPreferences.getBoolean(SettingsUtil.KEY_OLD_MARKER, newSettings.isUseOldMapMarker()));
+        newSettings.setShuffleIcons(sharedPreferences.getBoolean(SettingsUtil.SHUFFLE_ICONS, newSettings.isShuffleIcons()));
+        newSettings.setShowLuredPokemon(sharedPreferences.getBoolean(SettingsUtil.SHOW_LURED_POKEMON, newSettings.isShowLuredPokemon()));
+        newSettings.setNeutralGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, newSettings.isNeutralGymsEnabled()));
+        newSettings.setYellowGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_YELLOW_GYMS, newSettings.isYellowGymsEnabled()));
+        newSettings.setBlueGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_BLUE_GYMS, newSettings.isBlueGymsEnabled()));
+        newSettings.setRedGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_RED_GYMS, newSettings.isRedGymsEnabled()));
+        newSettings.setGuardPokemonMinCp(sharedPreferences.getInt(SettingsUtil.GUARD_MIN_CP, newSettings.getGuardPokemonMinCp()));
+        newSettings.setGuardPokemonMaxCp(sharedPreferences.getInt(SettingsUtil.GUARD_MAX_CP, newSettings.getGuardPokemonMaxCp()));
+        newSettings.setLuredPokestopsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, newSettings.isLuredPokestopsEnabled()));
+        newSettings.setNormalPokestopsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, newSettings.isNormalPokestopsEnabled()));
 
-    @SuppressWarnings("ConstantConditions")
-    public void searchRadiusDialog() {
-        scanValue = Integer.valueOf(preferences.getString(SettingsUtil.SCAN_VALUE,"4"));
-
-        final AppCompatDialog dialog = new AppCompatDialog(mContext);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_search_radius);
-
-        final SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.seekBar);
-        Button btnSave = (Button) dialog.findViewById(R.id.btnAccept);
-        Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
-        final TextView tvNumber = (TextView) dialog.findViewById(R.id.tvNumber);
-        final TextView tvEstimate = (TextView) dialog.findViewById(R.id.tvEstimate);
-        tvNumber.setText(String.valueOf(scanValue));
-        tvEstimate.setText(getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(scanValue,mContext));
-        seekBar.setProgress(scanValue);
-        seekBar.setMax(12);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                tvNumber.setText(String.valueOf(i));
-                tvEstimate.setText(getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(i,mContext));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int saveValue = seekBar.getProgress();
-                if (saveValue == 0) {
-                    scanValue = 1;
-                } else {
-                    scanValue = saveValue;
-                }
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(SettingsUtil.SCAN_VALUE,String.valueOf(scanValue));
-                editor.apply();
-                dialog.dismiss();
-            }
-        });
-
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
+        // Finally save the new settings
+        SettingsUtil.saveSettings(newSettings);
     }
 
     @Override
@@ -473,10 +493,13 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onResume() {
         realm = Realm.getDefaultInstance();
         super.onResume();
-        if (getView() != null) {
+        if (getView() != null)
+        {
             View frame = (View) getView().getParent();
             if (frame != null)
+            {
                 frame.setPadding(0, 0, 0, 0);
+            }
         }
     }
 }

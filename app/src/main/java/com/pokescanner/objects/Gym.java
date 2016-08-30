@@ -7,8 +7,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pokescanner.R;
-import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.DrawableUtils;
+import com.pokescanner.utils.SettingsUtil;
 
 import POGOProtos.Map.Fort.FortDataOuterClass;
 import io.realm.RealmObject;
@@ -61,7 +61,7 @@ public class Gym extends RealmObject
         MarkerOptions gymMarker = new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context)))
                 .position(position);
-        if(Settings.get(context).isUseOldMapMarker()){
+        if (SettingsUtil.getSettings().isUseOldMapMarker()){
             gymMarker.title("Gym");
             gymMarker.snippet(context.getText(R.string.guard_pokemon) + guardPokemonName + "\n" + context.getText(R.string.gym_points) + gymPoints);
         }

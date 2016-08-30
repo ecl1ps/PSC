@@ -14,9 +14,6 @@ import com.pokescanner.utils.UiUtils;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
-import org.joda.time.Interval;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import io.realm.RealmObject;
 import io.realm.annotations.Index;
@@ -77,7 +74,8 @@ public class PokeStop extends RealmObject
         MarkerOptions pokestopMarker = new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context)))
                 .position(position);
-        if(Settings.get(context).isUseOldMapMarker()){
+        if (SettingsUtil.getSettings().isUseOldMapMarker())
+        {
             pokestopMarker.title("Pokestop");
             pokestopMarker.snippet(snippetMessage);
         }
@@ -107,11 +105,15 @@ public class PokeStop extends RealmObject
             uri = "stop_lure";
             pokeStopType = DrawableUtils.LuredPokeStopType;
             //if ShowLuredPokemon is enabled, show the icon of the lured pokemon
-            if (SettingsUtil.getSettings(context).isShowLuredPokemon()) {
-                if (SettingsUtil.getSettings(context).isShuffleIcons()) {
+            Settings currentSettings = SettingsUtil.getSettings();
+            if (currentSettings.isShowLuredPokemon()) {
+                if (currentSettings.isShuffleIcons()) {
                     uri = "ps" + pokemonnumber;
                 }
-                else uri = "p" + pokemonnumber;
+                else
+                {
+                    uri = "p" + pokemonnumber;
+                }
             }
 
             //but don't show it if it's filtered, just show the lured pokestop icon

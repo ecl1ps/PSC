@@ -3,6 +3,9 @@ package com.pokescanner.objects;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.realm.RealmObject;
 
 /**
@@ -34,6 +37,16 @@ public class GoogleAuthToken extends RealmObject{
     }
 
     public GoogleAuthToken() {
+    }
+
+    public JSONObject toJSONObject() throws JSONException {
+        JSONObject result = new JSONObject();
+        result.put("accessToken", accessToken);
+        result.put("tokenType", tokenType);
+        result.put("expiresIn", expiresIn);
+        result.put("refreshToken", refreshToken);
+        result.put("idToken", idToken);
+        return result;
     }
 
     public String getAccessToken() {

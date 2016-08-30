@@ -1,7 +1,5 @@
 package com.pokescanner.settings;
 
-import android.content.Context;
-
 import com.pokescanner.utils.SettingsUtil;
 
 import org.json.JSONException;
@@ -46,41 +44,36 @@ public class Settings extends RealmObject{
     boolean luredPokestopsEnabled;
     boolean normalPokestopsEnabled;
 
-    //Called if no settings are found
+    //Used when the app is loaded for the first time
     public Settings() {
         super();
+
+        // Settings default values
+        key = 1;
+        updatesEnabled = false;
+        boundingBoxEnabled = false;
+        drivingModeEnabled = false;
+        forceEnglishNames = false;
+        enableLowMemory = true;
+        scanValue = 4;
+        serverRefresh = 11;
+        scale = 1;
+        mapRefresh = 2;
+        lastUsername = "";
+        useOldMapMarker = false;
+        shuffleIcons = false;
+        showLuredPokemon = true;
+        neutralGymsEnabled = false;
+        yellowGymsEnabled = false;
+        blueGymsEnabled = false;
+        redGymsEnabled = false;
+        guardPokemonMinCp = 1;
+        guardPokemonMaxCp = 1999;
+        luredPokestopsEnabled = false;
+        normalPokestopsEnabled = false;
     }
 
-    //Used when the app is loaded for the first time
-    public Settings(String mode) {
-        super();
-        if(mode.equals("new")) {
-            key = 1;
-            updatesEnabled = true;
-            boundingBoxEnabled = false;
-            drivingModeEnabled = false;
-            forceEnglishNames = false;
-            enableLowMemory = true;
-            scanValue = 4;
-            serverRefresh = 3;
-            scale = 2;
-            mapRefresh = 2;
-            lastUsername = "";
-            useOldMapMarker = false;
-            shuffleIcons = false;
-            showLuredPokemon = true;
-            neutralGymsEnabled = true;
-            yellowGymsEnabled = true;
-            blueGymsEnabled = true;
-            redGymsEnabled = true;
-            guardPokemonMinCp = 1;
-            guardPokemonMaxCp = 1999;
-            luredPokestopsEnabled = true;
-            normalPokestopsEnabled = true;
-        }
-    }
-
-    //This constructor is used in onder to get a non-updating realm object
+    //This constructor is used in order to get a non-updating realm object
     public Settings(Settings settings) {
         this.key = settings.key;
         this.updatesEnabled = settings.updatesEnabled;
@@ -105,12 +98,9 @@ public class Settings extends RealmObject{
         this.normalPokestopsEnabled = settings.normalPokestopsEnabled;
     }
 
-    public void save(Context context) {
-        SettingsUtil.saveSettings(context, this);
-    }
-
-    public static Settings get(Context context) {
-        return SettingsUtil.getSettings(context);
+    public void save()
+    {
+        SettingsUtil.saveSettings(this);
     }
 
     public JSONObject toJSONObject() throws JSONException{

@@ -39,14 +39,18 @@ import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.exceptions.RealmException;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
+    private static final String coreSettingsKey = "coreSettings";
+    private static final String accountsKey = "accounts";
+    private static final String pokemonFiltersKey = "pokemonFilters";
 
     private Realm realm;
     private Context mContext;
-    private final static int READ_PERMISSION_REQUESTED = 1300;
-    private final static int WRITE_PERMISSION_REQUESTED = 1400;
-    private final static int PICKFILE_RESULT_CODE = 1500;
+    private static final int READ_PERMISSION_REQUESTED = 1300;
+    private static final int WRITE_PERMISSION_REQUESTED = 1400;
+    private static final int PICKFILE_RESULT_CODE = 1500;
     private String backupContents, backupFileName;
 
     @Override
@@ -120,27 +124,27 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         try {
             //Get settings
-            Settings currentSettings = SettingsUtil.getSettings(mContext);
+            Settings currentSettings = SettingsUtil.getSettings();
             JSONObject coreSettings = currentSettings.toJSONObject();
-            backupObject.put("coreSettings", currentSettings.toJSONObject());
+            backupObject.put(coreSettingsKey, coreSettings);
 
             //Get pokemon filters
             ArrayList<FilterItem> currentPokeFilters = PokemonListLoader.getFilteredList();
             JSONArray filtersArray = new JSONArray();
             for (FilterItem filterItem : currentPokeFilters)
                 filtersArray.put(filterItem.toJSONObject());
-            backupObject.put("pokemonFilters", filtersArray);
+            backupObject.put(pokemonFiltersKey, filtersArray);
 
             //Get current users
             RealmResults<User> currentUsers = realm.where(User.class).findAll();
             JSONArray usersArray = new JSONArray();
             for (User user : currentUsers)
                 usersArray.put(user.toJSONObject());
-            backupObject.put("accounts", usersArray);
+            backupObject.put(accountsKey, usersArray);
 
             createFileNameDialog(backupObject.toString(4));
         }
-        catch(JSONException e) {
+        catch(RealmException | JSONException e) {
             showToast(R.string.backup_creation_error);
             Log.e("Backup error ", e.getMessage());
         }
@@ -149,9 +153,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     private void loadBackup(String backupString) {
         try {
             JSONObject backupObject = new JSONObject(backupString);
-            final String coreSettings = backupObject.getJSONObject("coreSettings").toString();
-            final JSONArray users = backupObject.getJSONArray("accounts");
-            final JSONArray pokemonFilters = backupObject.getJSONArray("pokemonFilters");
+            final String coreSettings = backupObject.getJSONObject(coreSettingsKey).toString();
+            final JSONArray users = backupObject.getJSONArray(accountsKey);
+            final JSONArray pokemonFilters = backupObject.getJSONArray(pokemonFiltersKey);
+
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
@@ -166,7 +171,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             });
             showToast(R.string.backup_load_success);
         }
-        catch(JSONException e) {
+        catch(RealmException | JSONException e) {
             showToast(R.string.backup_load_error);
             Log.e("Backup error ", e.getMessage());
         }

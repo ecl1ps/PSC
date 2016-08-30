@@ -5,7 +5,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.pokescanner.objects.FilterItem;
-import com.pokescanner.settings.Settings;
+import com.pokescanner.utils.SettingsUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +74,7 @@ public class PokemonListLoader {
     }
 
     private static void translateNamesIfNeeded(Context context, ArrayList<FilterItem> filterItems) {
-        if (!Settings.get(context).isForceEnglishNames()) {
+        if (!SettingsUtil.getSettings().isForceEnglishNames()) {
             for (FilterItem item : filterItems) {
                 String identifierName = "p" + Integer.toString(item.getNumber());
                 int resourceID = context.getResources().getIdentifier(identifierName, "string", context.getPackageName());

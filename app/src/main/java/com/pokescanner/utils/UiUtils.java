@@ -9,7 +9,6 @@ import com.pokescanner.helper.PokemonListLoader;
 import com.pokescanner.objects.FilterItem;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
-import com.pokescanner.settings.Settings;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
@@ -31,7 +30,7 @@ public class UiUtils {
     }
 
     public static String getSearchTime(int val,Context context) {
-        int serverRefreshValue = (BASE_DELAY * Settings.get(context).getServerRefresh());
+        int serverRefreshValue = (BASE_DELAY * SettingsUtil.getSettings().getServerRefresh());
         int serverDividedValue = serverRefreshValue / Realm.getDefaultInstance().where(User.class).findAll().size();
         int calculatedValue = hexagonal_number(val) * serverDividedValue;
         System.out.println(serverRefreshValue + " " + serverDividedValue + " " + calculatedValue);

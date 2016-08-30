@@ -22,7 +22,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @ToString
-@EqualsAndHashCode(callSuper = false,exclude = {"token","status","authType","lastScan"})
+@EqualsAndHashCode(callSuper = false,exclude = {"token","status","authType"})
 public class User extends RealmObject {
     static public final int PTC = 0;
     static public final int GOOGLE = 1;
@@ -56,7 +56,10 @@ public class User extends RealmObject {
         JSONObject result = new JSONObject();
         result.put("username", username);
         result.put("password", password);
-        result.put("token", token);
+        if (token != null)
+        {
+            result.put("token", token.toJSONObject());
+        }
         result.put("authType", authType);
         result.put("status", status);
         return result;

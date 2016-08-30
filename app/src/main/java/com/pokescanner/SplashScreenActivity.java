@@ -30,6 +30,7 @@ import com.pokescanner.updater.AppUpdate;
 import com.pokescanner.updater.AppUpdateDialog;
 import com.pokescanner.updater.AppUpdateLoader;
 import com.pokescanner.utils.PermissionUtils;
+import com.pokescanner.utils.SettingsUtil;
 import com.zl.reik.dilatingdotsprogressbar.DilatingDotsProgressBar;
 
 import org.greenrobot.eventbus.EventBus;
@@ -62,7 +63,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         MultiDex.install(this);
         super.onCreate(savedInstanceState);
-        //Crashlytics initialization
+        // Crashlytics initialization
         if (!BuildConfig.DEBUG)
             Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash_screen);
@@ -105,21 +106,28 @@ public class SplashScreenActivity extends AppCompatActivity {
         if (isConnectedToTheInternet()) {
             if (checkGooglePlayServicesAvailable()) {
                 if (getLocationPermission()) {
-                    Settings currentSettings = Settings.get(mContext);
+                    Settings currentSettings = SettingsUtil.getSettings();
                     if (BuildConfig.enableUpdater) {
                         if (currentSettings.isUpdatesEnabled()) {
                             new AppUpdateLoader().start();
                             checkingForUpdate = true;
-                        } else
+                        }
+                        else
+                        {
                             goToLoginScreen();
-                    }else
+                        }
+                    }
+                    else
                     {
                         goToLoginScreen();
                     }
                 }
             }
-        } else
+        }
+        else
+        {
             displayErrorDialog(getString(R.string.no_internet));
+        }
     }
 
     private void displayErrorDialog(String message) {

@@ -48,7 +48,7 @@ public class DrawableUtils
     }
 
     public static  Bitmap getBitmap(Context context, String URI) {
-        int unitScale = Settings.get(context).getScale();
+        int unitScale = SettingsUtil.getSettings().getScale();
         int resourceID = context.getResources().getIdentifier(URI, "drawable", context.getPackageName());
         return DrawableUtils.getBitmapFromView(resourceID, "", context,100);
     }
@@ -62,7 +62,7 @@ public class DrawableUtils
     public static int getResourceID(int pokemonid,Context context) {
         String uri = "p" + pokemonid;
 
-        if (SettingsUtil.getSettings(context).isShuffleIcons()) {
+        if (SettingsUtil.getSettings().isShuffleIcons()) {
             uri = "ps" + pokemonid;
         }
 
@@ -70,8 +70,10 @@ public class DrawableUtils
         return resourceID;
     }
 
-    public static Bitmap getBitmapFromView(int drawableId, String text, Context context,int type) {
-        int scale = Settings.get(context).getScale();
+    public static Bitmap getBitmapFromView(int drawableId, String text, Context context,int type)
+    {
+        Settings currentSettings = SettingsUtil.getSettings();
+        int scale = currentSettings.getScale();
 
         Bitmap bm = BitmapFactory.decodeResource(context.getResources(), drawableId).copy(Bitmap.Config.ARGB_8888, true);
 
@@ -81,14 +83,15 @@ public class DrawableUtils
         TextView timer = (TextView) pokeView.findViewById(R.id.timer);
         ImageView icon = (ImageView) pokeView.findViewById(R.id.icon);
 
-        if(Settings.get(context).isUseOldMapMarker()){
+        if (currentSettings.isUseOldMapMarker())
+        {
             timer.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
             timer.setTextColor(ContextCompat.getColor(context, android.R.color.black));
             timer.setTypeface(Typeface.create("Helvetica", Typeface.BOLD));
             timer.setTextSize(convertToPixels(context, 7));
         }
-
-        if (!Settings.get(context).isUseOldMapMarker()) {
+        else
+        {
             timer.setBackgroundColor(getColorFromType(type, context));
         }
 

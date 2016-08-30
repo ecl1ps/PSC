@@ -1,8 +1,6 @@
 package com.pokescanner.multiboxing;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.res.ResourcesCompat;
@@ -16,9 +14,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.pavelsikun.vintagechroma.ChromaDialog;
-import com.pavelsikun.vintagechroma.IndicatorMode;
-import com.pavelsikun.vintagechroma.colormode.ColorMode;
 import com.pokescanner.R;
 import com.pokescanner.objects.User;
 
