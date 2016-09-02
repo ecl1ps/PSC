@@ -1,5 +1,8 @@
 package com.pokescanner.settings;
 
+import android.media.RingtoneManager;
+import android.net.Uri;
+
 import com.pokescanner.utils.SettingsUtil;
 
 import org.json.JSONException;
@@ -43,6 +46,12 @@ public class Settings extends RealmObject{
     int guardPokemonMaxCp;
     boolean luredPokestopsEnabled;
     boolean normalPokestopsEnabled;
+    boolean isServiceEnabled;
+    int serviceRefresh;
+    boolean isServiceEnabledOnBoot;
+    boolean isNotificationGrouped;
+    String notificationRingtone;
+    boolean notificationVibrate;
 
     //Used when the app is loaded for the first time
     public Settings() {
@@ -56,7 +65,7 @@ public class Settings extends RealmObject{
         forceEnglishNames = false;
         enableLowMemory = true;
         scanValue = 4;
-        serverRefresh = 11;
+        serverRefresh = 10;
         scale = 1;
         mapRefresh = 2;
         lastUsername = "";
@@ -71,6 +80,12 @@ public class Settings extends RealmObject{
         guardPokemonMaxCp = 1999;
         luredPokestopsEnabled = false;
         normalPokestopsEnabled = false;
+        isServiceEnabled = false;
+        serviceRefresh = 1800000;
+        isServiceEnabledOnBoot = false;
+        isNotificationGrouped = true;
+        notificationRingtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString();
+        notificationVibrate = true;
     }
 
     //This constructor is used in order to get a non-updating realm object
@@ -96,6 +111,12 @@ public class Settings extends RealmObject{
         this.guardPokemonMaxCp = settings.guardPokemonMaxCp;
         this.luredPokestopsEnabled = settings.luredPokestopsEnabled;
         this.normalPokestopsEnabled = settings.normalPokestopsEnabled;
+        this.isServiceEnabled = settings.isServiceEnabled;
+        this.serviceRefresh = settings.serviceRefresh;
+        this.isServiceEnabledOnBoot = settings.isServiceEnabledOnBoot;
+        this.isNotificationGrouped = settings.isNotificationGrouped;
+        this.notificationRingtone = settings.notificationRingtone;
+        this.notificationVibrate = settings.notificationVibrate;
     }
 
     public void save()
@@ -125,6 +146,12 @@ public class Settings extends RealmObject{
         result.put(SettingsUtil.GUARD_MAX_CP, guardPokemonMaxCp);
         result.put(SettingsUtil.SHOW_LURED_POKESTOPS, luredPokestopsEnabled);
         result.put(SettingsUtil.SHOW_NORMAL_POKESTOPS, normalPokestopsEnabled);
+        result.put(SettingsUtil.ENABLE_SERVICE, isServiceEnabled);
+        result.put(SettingsUtil.SERVICE_REFRESH, serviceRefresh);
+        result.put(SettingsUtil.ENABLE_SERVICE_ON_BOOT, isServiceEnabledOnBoot);
+        result.put(SettingsUtil.GROUP_POKEMON, isNotificationGrouped);
+        result.put(SettingsUtil.NOTIFICATION_RINGTONE, notificationRingtone);
+        result.put(SettingsUtil.NOTIFICATION_VIBRATE, notificationVibrate);
         return result;
     }
 }

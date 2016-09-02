@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/category_notifications">
+
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:defaultValue="false"
+        android:key="enableService"
+        android:title="@string/enable_service"/>
+
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:defaultValue="false"
+        android:key="enableServiceOnBoot"
+        android:summary="@string/enable_service_on_boot_summary"
+        android:title="@string/enable_service_on_boot"/>
+
+    <ListPreference
+        android:defaultValue="1800000"
+        android:dialogTitle="@string/service_refresh_title"
+        android:entries="@array/service_refresh_rate"
+        android:entryValues="@array/service_refresh_rate_values"
+        android:key="serviceRefresh"
+        android:summary="@string/service_refresh_summary"
+        android:title="@string/service_refresh_title"/>
+
+    <Preference
+        android:key="pokemon_notification"
+        android:summary="@string/pokemon_notification_summary"
+        android:title="@string/pokemon_notification_title"/>
+
+    <PreferenceCategory
+        android:title="@string/notification_options_category"/>
+
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:defaultValue="true"
+        android:key="groupPokemon"
+        android:title="@string/group_pokemon"
+        android:summary="@string/group_pokemon_summary"/>
+
+    <RingtonePreference
+        android:key="notificationRingtone"
+        android:persistent="false"
+        android:ringtoneType="notification"
+        android:showDefault="true"
+        android:showSilent="true"
+        android:title="@string/ringtone">
+    </RingtonePreference>
+
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:defaultValue="true"
+        android:key="notificationVibrate"
+        android:title="@string/vibrate"/>
+
+</PreferenceScreen>

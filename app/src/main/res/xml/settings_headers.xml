@@ -1,16 +1,6 @@
 <preference-headers
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-    <header
-        android:fragment="com.pokescanner.settings.SettingsFragment"
-        android:title="@string/donate"
-        android:summary="@string/category_donate" >
-        <extra
-            android:name="page"
-            android:value="donatePage"/>
-    </header>
-
     <header
         android:fragment="com.pokescanner.settings.SettingsFragment"
         android:title="@string/category_filters"
@@ -18,6 +8,15 @@
         <extra
             android:name="page"
             android:value="filterOptions"/>
+    </header>
+
+    <header
+        android:fragment="com.pokescanner.settings.SettingsFragment"
+        android:title="@string/category_notifications"
+        android:summary="@string/category_notifications_summary" >
+        <extra
+            android:name="page"
+            android:value="notificationOptions"/>
     </header>
 
     <header

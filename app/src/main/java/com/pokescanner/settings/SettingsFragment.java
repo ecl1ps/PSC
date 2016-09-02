@@ -12,6 +12,7 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialog;
@@ -30,11 +31,13 @@ import android.widget.Toast;
 import com.pokescanner.BlacklistActivity;
 import com.pokescanner.BuildConfig;
 import com.pokescanner.ExpirationFilters;
+import com.pokescanner.NotificationActivity;
 import com.pokescanner.R;
 import com.pokescanner.events.AppUpdateEvent;
 import com.pokescanner.objects.Gym;
 import com.pokescanner.objects.PokeStop;
 import com.pokescanner.objects.Pokemons;
+import com.pokescanner.service.PokeReceiver;
 import com.pokescanner.updater.AppUpdate;
 import com.pokescanner.updater.AppUpdateDialog;
 import com.pokescanner.updater.AppUpdateLoader;
@@ -48,8 +51,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import io.realm.Realm;
 
-public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener
-{
+public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     SharedPreferences preferences;
     Preference scan_dialog;
     Preference gym_cp_filter;
@@ -60,6 +62,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     Preference pokemon_blacklist;
     Preference update;
     Preference serve_refresh_rate_dialog;
+    Preference pokemon_notification;
+    ListPreference service_refresh_rate;
+    SwitchPreference enable_service;
     Realm realm;
     private Context mContext;
     private View rootView;
@@ -75,6 +80,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 switch (page) {
                     case "filterOptions":
                         addPreferencesFromResource(R.xml.settings_filter);
+                        break;
+                    case "notificationOptions":
+                        addPreferencesFromResource(R.xml.settings_notification);
                         break;
                     case "mapOptions":
                         addPreferencesFromResource(R.xml.settings_map);
@@ -109,27 +117,33 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         Settings currentSettings = SettingsUtil.getSettings();
 
         preferences.edit()
-            .putBoolean(SettingsUtil.ENABLE_UPDATES, currentSettings.isUpdatesEnabled())
-            .putBoolean(SettingsUtil.ENABLE_LOW_MEMORY, currentSettings.isEnableLowMemory())
-            .putBoolean(SettingsUtil.KEY_BOUNDING_BOX, currentSettings.isBoundingBoxEnabled())
-            .putBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, currentSettings.isForceEnglishNames())
-            .putInt(SettingsUtil.SCAN_VALUE, currentSettings.getScanValue())
-            .putString(SettingsUtil.SERVER_REFRESH_RATE, String.valueOf(currentSettings.getServerRefresh()))
-            .putString(SettingsUtil.MAP_REFRESH_RATE, String.valueOf(currentSettings.getMapRefresh()))
-            .putString(SettingsUtil.POKEMON_ICON_SCALE, String.valueOf(currentSettings.getScale()))
-            .putString(SettingsUtil.LAST_USERNAME, currentSettings.getLastUsername())
-            .putBoolean(SettingsUtil.KEY_OLD_MARKER, currentSettings.isUseOldMapMarker())
-            .putBoolean(SettingsUtil.SHUFFLE_ICONS, currentSettings.isShuffleIcons())
-            .putBoolean(SettingsUtil.SHOW_LURED_POKEMON, currentSettings.isShowLuredPokemon())
-            .putBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, currentSettings.isNeutralGymsEnabled())
-            .putBoolean(SettingsUtil.SHOW_YELLOW_GYMS, currentSettings.isYellowGymsEnabled())
-            .putBoolean(SettingsUtil.SHOW_BLUE_GYMS, currentSettings.isBlueGymsEnabled())
-            .putBoolean(SettingsUtil.SHOW_RED_GYMS, currentSettings.isRedGymsEnabled())
-            .putInt(SettingsUtil.GUARD_MIN_CP, currentSettings.getGuardPokemonMinCp())
-            .putInt(SettingsUtil.GUARD_MAX_CP, currentSettings.getGuardPokemonMaxCp())
-            .putBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, currentSettings.isLuredPokestopsEnabled())
-            .putBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, currentSettings.isNormalPokestopsEnabled())
-            .commit();
+                .putBoolean(SettingsUtil.ENABLE_UPDATES, currentSettings.isUpdatesEnabled())
+                .putBoolean(SettingsUtil.ENABLE_LOW_MEMORY, currentSettings.isEnableLowMemory())
+                .putBoolean(SettingsUtil.KEY_BOUNDING_BOX, currentSettings.isBoundingBoxEnabled())
+                .putBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, currentSettings.isForceEnglishNames())
+                .putInt(SettingsUtil.SCAN_VALUE, currentSettings.getScanValue())
+                .putString(SettingsUtil.SERVER_REFRESH_RATE, String.valueOf(currentSettings.getServerRefresh()))
+                .putString(SettingsUtil.MAP_REFRESH_RATE, String.valueOf(currentSettings.getMapRefresh()))
+                .putString(SettingsUtil.POKEMON_ICON_SCALE, String.valueOf(currentSettings.getScale()))
+                .putString(SettingsUtil.LAST_USERNAME, currentSettings.getLastUsername())
+                .putBoolean(SettingsUtil.KEY_OLD_MARKER, currentSettings.isUseOldMapMarker())
+                .putBoolean(SettingsUtil.SHUFFLE_ICONS, currentSettings.isShuffleIcons())
+                .putBoolean(SettingsUtil.SHOW_LURED_POKEMON, currentSettings.isShowLuredPokemon())
+                .putBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, currentSettings.isNeutralGymsEnabled())
+                .putBoolean(SettingsUtil.SHOW_YELLOW_GYMS, currentSettings.isYellowGymsEnabled())
+                .putBoolean(SettingsUtil.SHOW_BLUE_GYMS, currentSettings.isBlueGymsEnabled())
+                .putBoolean(SettingsUtil.SHOW_RED_GYMS, currentSettings.isRedGymsEnabled())
+                .putInt(SettingsUtil.GUARD_MIN_CP, currentSettings.getGuardPokemonMinCp())
+                .putInt(SettingsUtil.GUARD_MAX_CP, currentSettings.getGuardPokemonMaxCp())
+                .putBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, currentSettings.isLuredPokestopsEnabled())
+                .putBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, currentSettings.isNormalPokestopsEnabled())
+                .putBoolean(SettingsUtil.ENABLE_SERVICE, currentSettings.isServiceEnabled())
+                .putString(SettingsUtil.SERVICE_REFRESH, String.valueOf(currentSettings.getServiceRefresh()))
+                .putBoolean(SettingsUtil.ENABLE_SERVICE_ON_BOOT, currentSettings.isServiceEnabledOnBoot())
+                .putBoolean(SettingsUtil.GROUP_POKEMON, currentSettings.isNotificationGrouped())
+                .putString(SettingsUtil.NOTIFICATION_RINGTONE, currentSettings.getNotificationRingtone())
+                .putBoolean(SettingsUtil.NOTIFICATION_VIBRATE, currentSettings.isNotificationVibrate())
+                .apply();
 
         realm = Realm.getDefaultInstance();
 
@@ -139,6 +153,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 switch (page) {
                     case "filterOptions":
                         setupFilterOptions();
+                        break;
+                    case "notificationOptions":
+                        setupNotificationOptions();
                         break;
                     case "mapOptions":
                         setupMapOptions();
@@ -169,6 +186,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
         final TextView tvNumber = (TextView) dialog.findViewById(R.id.tvNumber);
         final TextView tvEstimate = (TextView) dialog.findViewById(R.id.tvEstimate);
+        final TextView tvDescription = (TextView) dialog.findViewById(R.id.tvDescription);
 
         assert seekBar != null;
         assert btnCancel != null;
@@ -177,48 +195,44 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         assert tvEstimate != null;
 
         tvNumber.setText(String.valueOf(scanValue));
-        tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(scanValue, context));
+        tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTimeString(scanValue, context));
+        tvDescription.setText(String.format(context.getString(R.string.approx_distance), (scanValue * 140)));
         seekBar.setProgress(scanValue);
         seekBar.setMax(12);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 tvNumber.setText(String.valueOf(i));
-                tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTime(i, context));
+                tvEstimate.setText(context.getString(R.string.timeEstimate) + " " + UiUtils.getSearchTimeString(i, context));
+                tvDescription.setText(String.format(context.getString(R.string.approx_distance), (i * 140)));
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar)
-            {
+            public void onStartTrackingTouch(SeekBar seekBar) {
             }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar)
-            {
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
 
-        btnSave.setOnClickListener(new View.OnClickListener()
-        {
+        btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 int savedValue = seekBar.getProgress();
                 int scanOut = (savedValue == 0 ? 1 : savedValue);
 
                 PreferenceManager.getDefaultSharedPreferences(context)
-                    .edit()
-                    .putInt(SettingsUtil.SCAN_VALUE, scanOut)
-                    .commit();
+                        .edit()
+                        .putInt(SettingsUtil.SCAN_VALUE, scanOut)
+                        .apply();
                 dialog.dismiss();
             }
         });
 
-        btnCancel.setOnClickListener(new View.OnClickListener()
-        {
+        btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
-            {
+            public void onClick(View view) {
                 dialog.dismiss();
             }
         });
@@ -236,8 +250,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         bar.setDisplayHomeAsUpEnabled(true);
         bar.setDisplayShowTitleEnabled(true);
         bar.setHomeAsUpIndicator(R.drawable.back_button);
-        if (!donation)
-        {
+        if (!donation) {
             bar.setTitle(getPreferenceScreen().getTitle());
         }
     }
@@ -262,11 +275,47 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         pokemon_blacklist = getPreferenceManager().findPreference("pokemon_blacklist");
         pokemon_blacklist.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                Intent filterIntent = new Intent(mContext,BlacklistActivity.class);
+                Intent filterIntent = new Intent(mContext, BlacklistActivity.class);
                 startActivity(filterIntent);
                 return true;
             }
         });
+    }
+
+    private void setupNotificationOptions() {
+        enable_service = (SwitchPreference) getPreferenceManager().findPreference("enableService");
+        enable_service.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object enableService) {
+                if ((Boolean) enableService) {
+                    PokeReceiver.scheduleAlarm(mContext);
+                } else {
+                    PokeReceiver.cancelAlarm(mContext);
+                }
+                return true;
+            }
+        });
+
+        service_refresh_rate = (ListPreference) getPreferenceManager().findPreference("serviceRefresh");
+        service_refresh_rate.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object value) {
+                if (enable_service.isChecked()) {
+                    PokeReceiver.scheduleAlarm(mContext);
+                }
+                return true;
+            }
+        });
+
+        pokemon_notification = getPreferenceManager().findPreference("pokemon_notification");
+        pokemon_notification.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                Intent filterIntent = new Intent(mContext, NotificationActivity.class);
+                startActivity(filterIntent);
+                return true;
+            }
+        });
+
     }
 
     private void setupMapOptions() {
@@ -296,8 +345,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        if(realm.where(Gym.class).findAll().deleteAllFromRealm())
-                        {
+                        if (realm.where(Gym.class).findAll().deleteAllFromRealm()) {
                             Toast.makeText(mContext, getString(R.string.gyms_cleared), Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -312,8 +360,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        if(realm.where(Pokemons.class).findAll().deleteAllFromRealm())
-                        {
+                        if (realm.where(Pokemons.class).findAll().deleteAllFromRealm()) {
                             Toast.makeText(mContext, getString(R.string.pokemon_cleared), Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -328,8 +375,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        if(realm.where(PokeStop.class).findAll().deleteAllFromRealm())
-                        {
+                        if (realm.where(PokeStop.class).findAll().deleteAllFromRealm()) {
                             Toast.makeText(mContext, getString(R.string.pokestops_cleared), Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -359,7 +405,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             if (serverRefresh != null) {
                 screen.removePreference(serverRefresh);
             }
-            if (updateCategory!=null) {
+            if (updateCategory != null) {
                 screen.removePreference(updateCategory);
             }
 
@@ -409,13 +455,14 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.me/brianestrada"));
         startActivity(i);
     }
+
     public void serverRefreshDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Server Refresh Rate");
 
         final EditText input = new EditText(getActivity());
 
-        input.setText(preferences.getString(SettingsUtil.SERVER_REFRESH_RATE,"11"));
+        input.setText(preferences.getString(SettingsUtil.SERVER_REFRESH_RATE, "10"));
 
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         builder.setView(input);
@@ -424,7 +471,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 preferences.edit()
-                        .putString(SettingsUtil.SERVER_REFRESH_RATE,input.getText().toString())
+                        .putString(SettingsUtil.SERVER_REFRESH_RATE, input.getText().toString())
                         .apply();
             }
         });
@@ -440,8 +487,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s)
-    {
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Settings newSettings = SettingsUtil.getSettings();
         newSettings.setUpdatesEnabled(sharedPreferences.getBoolean(SettingsUtil.ENABLE_UPDATES, newSettings.isUpdatesEnabled()));
         newSettings.setBoundingBoxEnabled(sharedPreferences.getBoolean(SettingsUtil.KEY_BOUNDING_BOX, newSettings.isBoundingBoxEnabled()));
@@ -466,7 +512,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         newSettings.setGuardPokemonMaxCp(sharedPreferences.getInt(SettingsUtil.GUARD_MAX_CP, newSettings.getGuardPokemonMaxCp()));
         newSettings.setLuredPokestopsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, newSettings.isLuredPokestopsEnabled()));
         newSettings.setNormalPokestopsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, newSettings.isNormalPokestopsEnabled()));
-
+        newSettings.setServiceEnabled(sharedPreferences.getBoolean(SettingsUtil.ENABLE_SERVICE, newSettings.isServiceEnabled()));
+        newSettings.setServiceRefresh(Integer.valueOf(sharedPreferences.getString(SettingsUtil.SERVICE_REFRESH, String.valueOf(newSettings.getServiceRefresh()))));
+        newSettings.setServiceEnabledOnBoot(sharedPreferences.getBoolean(SettingsUtil.ENABLE_SERVICE_ON_BOOT, newSettings.isServiceEnabledOnBoot()));
+        newSettings.setNotificationGrouped(sharedPreferences.getBoolean(SettingsUtil.GROUP_POKEMON, newSettings.isNotificationGrouped()));
+        newSettings.setNotificationRingtone(sharedPreferences.getString(SettingsUtil.NOTIFICATION_RINGTONE, newSettings.getNotificationRingtone()));
+        newSettings.setNotificationVibrate(sharedPreferences.getBoolean(SettingsUtil.NOTIFICATION_VIBRATE, newSettings.isNotificationVibrate()));
         // Finally save the new settings
         SettingsUtil.saveSettings(newSettings);
     }
@@ -493,11 +544,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onResume() {
         realm = Realm.getDefaultInstance();
         super.onResume();
-        if (getView() != null)
-        {
+        if (getView() != null) {
             View frame = (View) getView().getParent();
-            if (frame != null)
-            {
+            if (frame != null) {
                 frame.setPadding(0, 0, 0, 0);
             }
         }

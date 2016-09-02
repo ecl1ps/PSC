@@ -1,23 +1,58 @@
 package com.pokescanner.service;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.util.TimeUtils;
+import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.pokescanner.MapsActivity;
 import com.pokescanner.R;
+import com.pokescanner.helper.PokeDistanceSorter;
+import com.pokescanner.helper.PokemonListLoader;
+import com.pokescanner.loaders.MultiAccountLoader;
+import com.pokescanner.objects.NotificationItem;
+import com.pokescanner.objects.Pokemons;
+import com.pokescanner.objects.User;
+import com.pokescanner.settings.Settings;
+import com.pokescanner.utils.PermissionUtils;
+import com.pokescanner.utils.SettingsUtil;
+import com.pokescanner.utils.UiUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import io.realm.Realm;
+
+import static com.pokescanner.helper.Generation.makeHexScanMap;
 
 /**
  * Created by Brian on 7/26/2016.
  */
-public class PokeService extends IntentService {
-    Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    long[] Vibration = new long[]{1000,1000};
+public class PokeService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    private GoogleApiClient mGoogleApiClient;
+    List<LatLng> scanMap = new ArrayList<>();
+    static LatLng location;
+
 
     public PokeService() {
         super("PokeScanner");
@@ -25,23 +60,180 @@ public class PokeService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Intent stopRecieve = new Intent();
-        stopRecieve.setAction("STOP_ACTION");
-        PendingIntent pendingIntentStop = PendingIntent.getBroadcast(this, 0, stopRecieve, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.icon)
-                .addAction(new NotificationCompat.Action(R.drawable.ic_close_white_24dp,"Cancel Service",pendingIntentStop))
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.drawable.icon))
-                .setContentTitle("Poke Scanner")
-                .setVibrate(Vibration)
-                .setSound(alarmSound)
-                .setLights(Color.RED, 3000, 3000)
-                .setContentText("Hello World!");
-        int mNotificationId = 213;
-
-        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        scanForPoke();
     }
+
+    private void scanForPoke() {
+
+        Settings currentSettings = SettingsUtil.getSettings();
+        int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
+        int scanValue = currentSettings.getScanValue();
+        PokeNotifications.ongiongNotification(getString(R.string.scan_running) + " " + UiUtils.getSearchTimeString(SettingsUtil.getSettings().getScanValue(), this), this);
+
+        Realm realm = Realm.getDefaultInstance();
+
+        //get our camera position
+        location = getCurrentLocation();
+
+        if (location != null) {
+            scanMap = makeHexScanMap(location, scanValue, 1, new ArrayList<LatLng>());
+
+            if (scanMap != null) {
+                //Pull our users from the realm
+                ArrayList<User> users = new ArrayList<>(realm.copyFromRealm(realm.where(User.class).findAll()));
+
+                MultiAccountLoader.setSleepTime(UiUtils.BASE_DELAY * SERVER_REFRESH_RATE);
+                //Set our map
+                MultiAccountLoader.setScanMap(scanMap);
+                //Set our users
+                MultiAccountLoader.setUsers(users);
+                MultiAccountLoader.setContext(this);
+                MultiAccountLoader.setIsBackground(true);
+                //Begin our threads???
+                MultiAccountLoader.startThreads();
+            } else {
+                PokeNotifications.ongiongNotification("Scan failed", this);
+            }
+        } else {
+            PokeNotifications.ongiongNotification("Scan failed", this);
+        }
+        realm.close();
+    }
+
+
+    @SuppressWarnings({"MissingPermission"})
+    public LatLng getCurrentLocation() {
+        if (PermissionUtils.doWeHaveGPSandLOC(this)) {
+            if (mGoogleApiClient.isConnected()) {
+                Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                if (location != null) {
+                    return new LatLng(location.getLatitude(), location.getLongitude());
+                }
+                return null;
+            }
+            return null;
+        }
+        return null;
+    }
+
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    static private ArrayList<Pokemons> pokemonRecycler = new ArrayList<>();
+
+    public static void pokeNotification(Context context) {
+        String content = String.format(context.getString(R.string.scan_complete), TimeUnit.MILLISECONDS.toMinutes(SettingsUtil.getSettings().getServiceRefresh()));
+        PokeNotifications.ongiongNotification(content, context);
+
+        Realm realm = Realm.getDefaultInstance();
+        //Create an arraylist to hold our new pokemon
+        ArrayList<Pokemons> pokemon = new ArrayList<>(realm.copyFromRealm(realm.where(Pokemons.class).findAll()));
+        //Clear our current list
+        pokemonRecycler.clear();
+
+        //Alright does our incomming list contain any pokemon that have expired?
+        for (int i = 0; i < pokemon.size(); i++) {
+            //Put our pokemon inside an object
+            Pokemons temp = pokemon.get(i);
+            //Now we check has it expired
+            if (!temp.isExpired()) {
+                //If it has lets removed the pokemon
+                realm.beginTransaction();
+                realm.where(Pokemons.class).equalTo("encounterid", temp.getEncounterid()).findAll().deleteAllFromRealm();
+                pokemon.remove(i);
+                realm.commitTransaction();
+            }
+        }
+        realm.close();
+
+        //If the value isnt null then lets continue
+        if (location != null) {
+            Location tempLocation = new Location("");
+            tempLocation.setLatitude(location.latitude);
+            tempLocation.setLongitude(location.longitude);
+            //Write distance to pokemons
+            for (int i = 0; i < pokemon.size(); i++) {
+                Pokemons pokemons = pokemon.get(i);
+
+                if (PokemonListLoader.getNotificationList().contains(new NotificationItem(pokemons.getNumber()))) {
+                    //DO MATH
+                    Location temp = new Location("");
+
+                    temp.setLatitude(pokemons.getLatitude());
+                    temp.setLongitude(pokemons.getLongitude());
+
+                    double distance = tempLocation.distanceTo(temp);
+                    pokemons.setDistance((int) Math.round(distance));
+                    pokemons.setBearing(getBearing(location, temp));
+
+                    //ADD OUR POKEMANS TO OUR OUT LIST
+                    pokemonRecycler.add(pokemons);
+                }
+            }
+        }
+
+        if (pokemonRecycler.size() > 0) {
+            Collections.sort(pokemonRecycler, new PokeDistanceSorter());
+
+            PokeNotifications.pokeNotification(context, pokemonRecycler);
+        }
+
+        Log.d("POKE", "Found " + pokemonRecycler.size() + " pokemon");
+    }
+
+
+
+    protected static String getBearing(LatLng user, Location pokemon) {
+        double longitude1 = user.longitude;
+        double longitude2 = pokemon.getLongitude();
+        double latitude1 = Math.toRadians(user.latitude);
+        double latitude2 = Math.toRadians(pokemon.getLatitude());
+        double longDiff = Math.toRadians(longitude2 - longitude1);
+        double y = Math.sin(longDiff) * Math.cos(latitude2);
+        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
+
+        double resultDegree = (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
+        String coordNames[] = {"North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest", "North"};
+        double directionid = Math.round(resultDegree / 45);
+        if (directionid < 0) {
+            directionid = directionid + 9;
+        }
+
+        return coordNames[(int) directionid];
+    }
+
+
 }

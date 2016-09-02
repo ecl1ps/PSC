@@ -1,11 +1,23 @@
 package com.pokescanner.loaders;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.pokescanner.helper.MyPartition;
 import com.pokescanner.objects.User;
+import com.pokescanner.service.PokeService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Brian on 7/31/2016.
@@ -13,34 +25,36 @@ import java.util.List;
 public class MultiAccountLoader {
     static private List<LatLng> scanMap;
     static private List<List<LatLng>> scanMaps;
-    static private ArrayList<Thread> threads;
     static private ArrayList<User> users;
     static private int SLEEP_TIME;
+    static private ArrayList<ObjectLoaderPTC> tasks;
+    static private Context sContext;
+    static private boolean isBackground;
+
 
     static public void startThreads() {
         scanMaps = new ArrayList<>();
-        threads = new ArrayList<>();
+        tasks = new ArrayList<>();
 
         int userSize = users.size();
-        double dividedValue = (float) scanMap.size()/userSize;
+        double dividedValue = (float) scanMap.size() / userSize;
         int scanMapSplitSize = (int) Math.ceil(dividedValue);
 
         System.out.println("Divided Value:" + dividedValue + "(scanMap.size() = " + scanMap.size()
-                         + "; userSize = " + userSize +  ")");
+                + "; userSize = " + userSize + ")");
 
-        scanMaps = MyPartition.partition(scanMap,scanMapSplitSize);
+        scanMaps = MyPartition.partition(scanMap, scanMapSplitSize);
 
         System.out.println("Scan Map Size: " + scanMaps.size());
 
-        for (int i = 0;i<scanMaps.size();i++) {
+        for (int i = 0; i < scanMaps.size(); i++) {
             List<LatLng> tempMap = scanMaps.get(i);
             User tempUser = users.get(i);
-            threads.add(new ObjectLoaderPTC(tempUser,tempMap,SLEEP_TIME,i));
+            ObjectLoaderPTC objectLoaderPTC = new ObjectLoaderPTC(sContext, tempUser, tempMap, SLEEP_TIME, i);
+            objectLoaderPTC.executeOnExecutor(THREAD_POOL_EXECUTOR);
+            tasks.add(objectLoaderPTC);
         }
 
-        for (Thread thread: threads) {
-            thread.start();
-        }
     }
 
     static public void setSleepTime(int SLEEP_TIME) {
@@ -55,33 +69,68 @@ public class MultiAccountLoader {
         MultiAccountLoader.scanMap = scanMap;
     }
 
-    public static boolean areThreadsRunning() {
-        if (threads==null) {
-            return false;
-        }
-        if (threads.size() != 0) {
-            if (threads.get(0).getState()== Thread.State.TERMINATED) {
-                return false;
-            }else {
-                return true;
+    static public void setContext(Context context) {
+        MultiAccountLoader.sContext = context;
+    }
+
+    public static void setIsBackground(boolean isBackground) {
+        MultiAccountLoader.isBackground = isBackground;
+    }
+
+    static public void checkIfComplete(Context context) {
+        Log.d("POKE", "Check complete");
+        int counter = 1;
+        for (ObjectLoaderPTC objectLoaderPTC : tasks) {
+            if (objectLoaderPTC.getStatus() == AsyncTask.Status.FINISHED) {
+                counter++;
             }
-        }else {
-            return false;
+        }
+        if (counter == scanMaps.size()) {
+            Log.d("POKE", "All threads complete!");
+            if (isBackground) {
+                PokeService.pokeNotification(context);
+            }
         }
     }
 
-    static public void cancelAllThreads() {
-        while (threads != null) {
-            for (Thread thread: threads) {
-                try {
-                    thread.interrupt();
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }finally {
-                    threads = null;
-                }
+    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
+        private final AtomicInteger mCount = new AtomicInteger(1);
+
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "AsyncTask #" + mCount.getAndIncrement());
+        }
+    };
+
+    private static final BlockingQueue<Runnable> sPoolWorkQueue =
+            new LinkedBlockingQueue<Runnable>(128);
+
+    private static final Executor THREAD_POOL_EXECUTOR;
+
+    static {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                30, 30, 30, TimeUnit.SECONDS,
+                sPoolWorkQueue, sThreadFactory);
+        threadPoolExecutor.allowCoreThreadTimeOut(true);
+        THREAD_POOL_EXECUTOR = threadPoolExecutor;
+    }
+
+    public static void cancelAllThreads() {
+        if (tasks != null) {
+            for (ObjectLoaderPTC objectLoaderPTC : tasks) {
+                objectLoaderPTC.cancel(true);
             }
         }
     }
+
+    public static boolean areThreadsRunning() {
+        if (tasks != null && tasks.size() > 0) {
+            for (ObjectLoaderPTC objectLoaderPTC : tasks) {
+                if (objectLoaderPTC.getStatus() != AsyncTask.Status.FINISHED) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

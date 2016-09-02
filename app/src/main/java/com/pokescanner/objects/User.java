@@ -6,6 +6,7 @@ import android.graphics.Color;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Objects;
 import java.util.Random;
 
 import io.realm.RealmObject;
@@ -56,12 +57,15 @@ public class User extends RealmObject {
         JSONObject result = new JSONObject();
         result.put("username", username);
         result.put("password", password);
-        if (token != null)
-        {
+        if (authType == GOOGLE) {
             result.put("token", token.toJSONObject());
         }
         result.put("authType", authType);
         result.put("status", status);
         return result;
+    }
+
+    public long getSeed() {
+        return (long) Objects.hash(new Object[]{this.username + this.password});
     }
 }

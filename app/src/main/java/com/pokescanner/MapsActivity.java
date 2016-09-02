@@ -257,6 +257,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     MultiAccountLoader.setScanMap(scanMap);
                     //Set our users
                     MultiAccountLoader.setUsers(users);
+                    MultiAccountLoader.setIsBackground(false);
                     //Begin our threads???
                     MultiAccountLoader.startThreads();
                 } else {
@@ -331,45 +332,56 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             showProgressbar(false);
         }
 
-        if (!LIST_MODE) {
-            if (mMap != null) {
-                LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
-                createMapObjects();
+            if (!LIST_MODE) {
+                if (mMap != null) {
+                    LatLngBounds curScreen = mMap.getProjection().getVisibleRegion().latLngBounds;
+                    createMapObjects();
 
-                //Load our Pokemon Array
-                ArrayList<Pokemons> pokemons = new ArrayList<Pokemons>(realm.copyFromRealm(realm.where(Pokemons.class).findAll()));
-                //Okay so we're going to fix the annoying issue where the markers were being constantly redrawn
-                for (int i = 0; i < pokemons.size(); i++) {
-                    //Get our pokemon from the list
-                    Pokemons pokemon = pokemons.get(i);
-                    //Is our pokemon contained within the bounds of the camera?
-                    if (curScreen.contains(new LatLng(pokemon.getLatitude(), pokemon.getLongitude()))) {
-                        //If yes then has he expired?
-                        //This isnt worded right it should say isNotExpired (Will fix later)
-                        if (pokemon.isExpired()) {
-                            if (UiUtils.isPokemonFiltered(pokemon) ||
-                                    UiUtils.isPokemonExpiredFiltered(pokemon, this)) {
-                                if (pokemonsMarkerMap.containsKey(pokemon)) {
-                                    Marker marker = pokemonsMarkerMap.get(pokemon);
-                                    if (marker != null) {
-                                        marker.remove();
-                                        pokemonsMarkerMap.remove(pokemon);
+                    //Load our Pokemon Array
+                    ArrayList<Pokemons> pokemons = new ArrayList<Pokemons>(realm.copyFromRealm(realm.where(Pokemons.class).findAll()));
+                    //Okay so we're going to fix the annoying issue where the markers were being constantly redrawn
+                    for (int i = 0; i < pokemons.size(); i++) {
+                        //Get our pokemon from the list
+                        Pokemons pokemon = pokemons.get(i);
+                        //Is our pokemon contained within the bounds of the camera?
+                        if (curScreen.contains(new LatLng(pokemon.getLatitude(), pokemon.getLongitude()))) {
+                            //If yes then has he expired?
+                            //This isnt worded right it should say isNotExpired (Will fix later)
+                            if (pokemon.isExpired()) {
+                                if (UiUtils.isPokemonFiltered(pokemon) ||
+                                        UiUtils.isPokemonExpiredFiltered(pokemon, this)) {
+                                    if (pokemonsMarkerMap.containsKey(pokemon)) {
+                                        Marker marker = pokemonsMarkerMap.get(pokemon);
+                                        if (marker != null) {
+                                            marker.remove();
+                                            pokemonsMarkerMap.remove(pokemon);
+                                        }
+                                    }
+                                } else {
+                                    //Okay finally is he contained within our hashmap?
+                                    if (pokemonsMarkerMap.containsKey(pokemon)) {
+                                        //Well if he is then lets pull out our marker.
+                                        Marker marker = pokemonsMarkerMap.get(pokemon);
+                                        //Update the marker
+                                        //UNTESTED
+                                        if (marker != null) {
+                                            marker = pokemon.updateMarker(marker, this);
+                                        }
+                                    } else {
+                                        //If our pokemon wasn't in our hashmap lets add him
+                                        pokemonsMarkerMap.put(pokemon, mMap.addMarker(pokemon.getMarker(this)));
                                     }
                                 }
                             } else {
-                                //Okay finally is he contained within our hashmap?
-                                if (pokemonsMarkerMap.containsKey(pokemon)) {
-                                    //Well if he is then lets pull out our marker.
-                                    Marker marker = pokemonsMarkerMap.get(pokemon);
-                                    //Update the marker
-                                    //UNTESTED
-                                    if (marker != null) {
-                                        marker = pokemon.updateMarker(marker, this);
-                                    }
-                                } else {
-                                    //If our pokemon wasn't in our hashmap lets add him
-                                    pokemonsMarkerMap.put(pokemon, mMap.addMarker(pokemon.getMarker(this)));
-                                }
+                                //If our pokemon expired lets remove the marker
+                                if (pokemonsMarkerMap.get(pokemon) != null)
+                                    pokemonsMarkerMap.get(pokemon).remove();
+                                //Then remove the pokemon
+                                pokemonsMarkerMap.remove(pokemon);
+                                //Finally lets remove him from our realm.
+                                realm.beginTransaction();
+                                realm.where(Pokemons.class).equalTo("encounterid", pokemon.getEncounterid()).findAll().deleteAllFromRealm();
+                                realm.commitTransaction();
                             }
                         } else {
                             //If our pokemon expired lets remove the marker
@@ -377,22 +389,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 pokemonsMarkerMap.get(pokemon).remove();
                             //Then remove the pokemon
                             pokemonsMarkerMap.remove(pokemon);
-                            //Finally lets remove him from our realm.
-                            realm.beginTransaction();
-                            realm.where(Pokemons.class).equalTo("encounterid", pokemon.getEncounterid()).findAll().deleteAllFromRealm();
-                            realm.commitTransaction();
                         }
-                    } else {
-                        //If our pokemon expired lets remove the marker
-                        if (pokemonsMarkerMap.get(pokemon) != null)
-                            pokemonsMarkerMap.get(pokemon).remove();
-                        //Then remove the pokemon
-                        pokemonsMarkerMap.remove(pokemon);
                     }
                 }
             }
         }
-    }
+
 
     public void refreshGymsAndPokestops() {
         if (!LIST_MODE) {

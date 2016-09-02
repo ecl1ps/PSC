@@ -28,6 +28,12 @@ public class SettingsUtil {
     public static final String SHUFFLE_ICONS = "shuffleIcons";
     public static final String SHOW_LURED_POKESTOPS = "showLuredPokestops";
     public static final String SHOW_NORMAL_POKESTOPS = "showNormalPokestops";
+    public static final String ENABLE_SERVICE = "enableService";
+    public static final String SERVICE_REFRESH = "serviceRefresh";
+    public static final String ENABLE_SERVICE_ON_BOOT = "enableServiceOnBoot";
+    public static final String GROUP_POKEMON = "groupPokemon";
+    public static final String NOTIFICATION_RINGTONE = "notificationRingtone";
+    public static final String NOTIFICATION_VIBRATE = "notificationVibrate";
 
     public static Settings getSettings()
     {

@@ -1,5 +1,10 @@
 package com.pokescanner.loaders;
 
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.api.map.Map;
@@ -17,25 +22,34 @@ import com.pokescanner.objects.Gym;
 import com.pokescanner.objects.PokeStop;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
+import com.pokescanner.service.PokeService;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import POGOProtos.Map.Fort.FortDataOuterClass;
 import POGOProtos.Map.Pokemon.MapPokemonOuterClass;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
 
-public class ObjectLoaderPTC extends Thread {
+public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
     User user;
     List<LatLng> scanMap;
     int SLEEP_TIME;
     private Realm realm;
     int position;
+    Context context;
 
-    public ObjectLoaderPTC(User user, List<LatLng> scanMap, int SLEEP_TIME, int pos) {
+
+    public ObjectLoaderPTC(Context context, User user, List<LatLng> scanMap, int SLEEP_TIME, int pos) {
+        this.context = context;
         this.user = user;
         this.scanMap = scanMap;
         this.SLEEP_TIME = SLEEP_TIME;
@@ -43,7 +57,8 @@ public class ObjectLoaderPTC extends Thread {
     }
 
     @Override
-    public void run() {
+    protected Void doInBackground(Void... voids) {
+        Log.d("POKE", "Starting thread " + position);
         try {
             OkHttpClient client = new OkHttpClient();
             //Create our provider and set it to null
@@ -64,39 +79,39 @@ public class ObjectLoaderPTC extends Thread {
 
                 PokemonGo go = new PokemonGo(provider, client);
 
-                if (go != null) {
-                    for (LatLng pos : scanMap) {
-                        go.setLatitude(pos.latitude);
-                        go.setLongitude(pos.longitude);
-                        Map map = go.getMap();
-                        MapObjects event = map.getMapObjects();
-                        final Collection<MapPokemonOuterClass.MapPokemon> collectionPokemon = event.getCatchablePokemons();
-                        final Collection<FortDataOuterClass.FortData> collectionGyms = event.getGyms();
-                        final Collection<Pokestop> collectionPokeStops = event.getPokestops();
+                Thread.sleep(500);
+                for (LatLng pos : scanMap) {
+                    go.setLatitude(pos.latitude);
+                    go.setLongitude(pos.longitude);
+                    Map map = go.getMap();
+                    MapObjects event = map.getMapObjects();
+                    final Collection<MapPokemonOuterClass.MapPokemon> collectionPokemon = event.getCatchablePokemons();
+                    final Collection<FortDataOuterClass.FortData> collectionGyms = event.getGyms();
+                    final Collection<Pokestop> collectionPokeStops = event.getPokestops();
 
-                        if(EventBus.getDefault().hasSubscriberForEvent(ScanCircleEvent.class)) {
-                            EventBus.getDefault().post(new ScanCircleEvent(pos,user.getAccountColor()));
-                        }
-
-                        realm = Realm.getDefaultInstance();
-                        realm.executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                for (MapPokemonOuterClass.MapPokemon pokemonOut : collectionPokemon)
-                                    realm.copyToRealmOrUpdate(new Pokemons(pokemonOut));
-
-                                for (FortDataOuterClass.FortData gymOut : collectionGyms)
-                                    realm.copyToRealmOrUpdate(new Gym(gymOut));
-
-                                for (Pokestop pokestopOut : collectionPokeStops)
-                                    realm.copyToRealmOrUpdate(new PokeStop(pokestopOut));
-                            }
-                        });
-                        realm.close();
-
-                        Thread.sleep(SLEEP_TIME);
+                    if (EventBus.getDefault().hasSubscriberForEvent(ScanCircleEvent.class)) {
+                        EventBus.getDefault().post(new ScanCircleEvent(pos, user.getAccountColor()));
                     }
+
+                    realm = Realm.getDefaultInstance();
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            for (MapPokemonOuterClass.MapPokemon pokemonOut : collectionPokemon)
+                                realm.copyToRealmOrUpdate(new Pokemons(pokemonOut));
+
+                            for (FortDataOuterClass.FortData gymOut : collectionGyms)
+                                realm.copyToRealmOrUpdate(new Gym(gymOut));
+
+                            for (Pokestop pokestopOut : collectionPokeStops)
+                                realm.copyToRealmOrUpdate(new PokeStop(pokestopOut));
+                        }
+                    });
+                    realm.close();
+
+                    Thread.sleep(SLEEP_TIME);
                 }
+
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -104,9 +119,16 @@ public class ObjectLoaderPTC extends Thread {
             e.printStackTrace();
         } catch (LoginFailedException e) {
             e.printStackTrace();
-        }catch (AsyncPokemonGoException e) {
+        } catch (AsyncPokemonGoException e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        MultiAccountLoader.checkIfComplete(context);
+        Log.d("POKE", "Thread " + position + " complete");
     }
 }
 

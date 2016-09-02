@@ -1,7 +1,12 @@
 package com.pokescanner.multiboxing;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.ColorInt;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.pavelsikun.vintagechroma.ChromaDialog;
 import com.pavelsikun.vintagechroma.IndicatorMode;
@@ -18,7 +24,14 @@ import com.pokescanner.R;
 import com.pokescanner.loaders.AuthAccountsLoader;
 import com.pokescanner.loaders.AuthSingleAccountLoader;
 import com.pokescanner.objects.User;
+import com.pokescanner.utils.PermissionUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -28,8 +41,9 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmConfiguration;
 
-public class MultiboxingActivity extends AppCompatActivity{
+public class MultiboxingActivity extends AppCompatActivity {
 
+    public static final String ACCOUNT_FILE_NAME = "pokealert_accounts.txt";
     @BindView(R.id.rvMultiboxingAccountList)
     RecyclerView userRecycler;
     private ArrayList<User> userList;
@@ -117,7 +131,7 @@ public class MultiboxingActivity extends AppCompatActivity{
     }
 
 
-    private void loadAccounts(){
+    private void loadAccounts() {
         userList.clear();
         userList.addAll(realm.copyFromRealm(realm.where(User.class).findAll()));
         userAdapter.notifyDataSetChanged();
@@ -134,7 +148,7 @@ public class MultiboxingActivity extends AppCompatActivity{
 
     @OnClick(R.id.btnAddAccount)
     public void addAccountDialog() {
-        View view = getLayoutInflater().inflate(R.layout.dialog_add_account,null);
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_account, null);
         final AlertDialog builder = new AlertDialog.Builder(this).create();
 
         final TextView etUsername = (TextView) view.findViewById(R.id.etAddUsername);
@@ -142,6 +156,7 @@ public class MultiboxingActivity extends AppCompatActivity{
 
         Button btnAdd = (Button) view.findViewById(R.id.btnOk);
         Button btnCancel = (Button) view.findViewById(R.id.btnCancel);
+        Button btnAddFromFile = (Button) view.findViewById(R.id.btnAddFromFile);
 
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -150,7 +165,7 @@ public class MultiboxingActivity extends AppCompatActivity{
                 String username = etUsername.getText().toString();
                 String password = etPassword.getText().toString();
 
-                User user = new User(username,password,null,User.PTC,User.STATUS_UNKNOWN);
+                User user = new User(username, password, null, User.PTC, User.STATUS_UNKNOWN);
 
                 realm.beginTransaction();
                 realm.copyToRealmOrUpdate(user);
@@ -163,13 +178,20 @@ public class MultiboxingActivity extends AppCompatActivity{
             }
         });
 
+        btnAddFromFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadAccountFromFile();
+                builder.dismiss();
+            }
+        });
+
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 builder.dismiss();
             }
         });
-
 
 
         builder.setView(view);
@@ -186,4 +208,58 @@ public class MultiboxingActivity extends AppCompatActivity{
         realm.close();
         super.onDestroy();
     }
+
+    public void loadAccountFromFile() {
+        if (!PermissionUtils.doWeHaveReadWritePermission(this)) {
+            PermissionUtils.requestWritePermission(this);
+        }
+        BufferedReader bw = null;
+        File file = new File((Environment.getExternalStorageDirectory() + "/") + ACCOUNT_FILE_NAME);
+        try {
+            if (file.exists()) {
+                bw = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = bw.readLine()) != null) {
+                    String[] accountInfo = line.split(" ");
+                    if (accountInfo.length >= 3 && accountInfo[2].equals("PTC")) {
+                        User user = new User(accountInfo[0].trim(), accountInfo[1].trim(), null, User.PTC, User.STATUS_UNKNOWN);
+
+                        realm.beginTransaction();
+                        realm.copyToRealmOrUpdate(user);
+                        realm.commitTransaction();
+                    }
+                }
+                refreshAccounts();
+            } else {
+                Toast.makeText(this, "No file found", Toast.LENGTH_SHORT).show();
+            }
+            bw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+//                Settings.saveAccounts(getApplicationContext(), new HashSet(this.accounts));
+
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PermissionUtils.MY_PERMISSIONS_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    loadAccountFromFile();
+                }
+            }
+        }
+    }
+
+
 }

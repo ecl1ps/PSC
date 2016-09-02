@@ -11,8 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.pokescanner.helper.PokemonListLoader;
-import com.pokescanner.objects.FilterItem;
-import com.pokescanner.recycler.BlacklistRecyclerAdapter;
+import com.pokescanner.objects.NotificationItem;
+import com.pokescanner.recycler.NotificationRecyclerAdapter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,13 +26,13 @@ import io.realm.Realm;
 /**
  * Created by Brian on 7/22/2016.
  */
-public class BlacklistActivity extends AppCompatActivity implements TextWatcher {
+public class NotificationActivity extends AppCompatActivity implements TextWatcher {
     @BindView(R.id.etSearch) EditText etSearch;
-    @BindView(R.id.filterRecycler) RecyclerView filterRecycler;
+    @BindView(R.id.filterRecycler) RecyclerView notificationRecycler;
     @BindView(R.id.btnNone) Button btnNone;
     @BindView(R.id.btnAll) Button btnAll;
 
-    ArrayList<FilterItem> filterItems = new ArrayList<>();
+    ArrayList<NotificationItem> notificationItems = new ArrayList<>();
     RecyclerView.Adapter mAdapter;
     Realm realm;
 
@@ -47,7 +47,7 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
         etSearch.addTextChangedListener(this);
 
         try {
-            filterItems = PokemonListLoader.getPokelist(this, PokemonListLoader.FILTER);
+            notificationItems = PokemonListLoader.getPokelist(this, PokemonListLoader.NOTIFICATION);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -57,24 +57,24 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
 
     public void setupRecycler(){
         RecyclerView.LayoutManager mLayoutManager;
-        filterRecycler.setHasFixedSize(true);
+        notificationRecycler.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
-        filterRecycler.setLayoutManager(mLayoutManager);
+        notificationRecycler.setLayoutManager(mLayoutManager);
 
-        mAdapter = new BlacklistRecyclerAdapter(filterItems, new BlacklistRecyclerAdapter.onCheckedListener() {
+        mAdapter = new NotificationRecyclerAdapter(notificationItems, new NotificationRecyclerAdapter.onCheckedListener() {
             @Override
-            public void onChecked(final FilterItem filterItem) {
+            public void onChecked(final NotificationItem notificationItem) {
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        realm.copyToRealmOrUpdate(filterItem);
+                        realm.copyToRealmOrUpdate(notificationItem);
                     }
                 });
             }
         });
 
 
-        filterRecycler.setAdapter(mAdapter);
+        notificationRecycler.setAdapter(mAdapter);
 
     }
 
@@ -87,7 +87,7 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                realm.copyToRealmOrUpdate(filterItems);
+                realm.copyToRealmOrUpdate(notificationItems);
             }
         });
         finish();
@@ -99,11 +99,11 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                filterItems.clear();
-                filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class)
+                notificationItems.clear();
+                notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class)
                         .findAll()));
-                for (FilterItem filterItem: filterItems) {
-                    filterItem.setFiltered(false);
+                for (NotificationItem notificationItem: notificationItems) {
+                    notificationItem.setNotification(false);
                 }
                 mAdapter.notifyDataSetChanged();
             }
@@ -115,11 +115,11 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                filterItems.clear();
-                filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class)
+                notificationItems.clear();
+                notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class)
                         .findAll()));
-                for (FilterItem filterItem: filterItems) {
-                    filterItem.setFiltered(true);
+                for (NotificationItem notificationItem: notificationItems) {
+                    notificationItem.setNotification(true);
                 }
                 mAdapter.notifyDataSetChanged();
             }
@@ -136,16 +136,16 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    filterItems.clear();
-                    filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class)
+                    notificationItems.clear();
+                    notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class)
                             .contains("Name",charSequence.toString(), Case.INSENSITIVE)
                             .findAll()));
                     mAdapter.notifyDataSetChanged();
                 }
             });
         }else {
-            filterItems.clear();
-            filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class).findAll()));
+            notificationItems.clear();
+            notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class).findAll()));
             mAdapter.notifyDataSetChanged();
         }
     }

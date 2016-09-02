@@ -29,7 +29,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false,exclude = {"distance","Name","Number","expires"})
+@EqualsAndHashCode(callSuper = false,exclude = {"bearing","distance","Name","Number","expires"})
 public class Pokemons  extends RealmObject{
     int Number;
     @Index
@@ -39,7 +39,8 @@ public class Pokemons  extends RealmObject{
     long expires;
     double longitude;
     double latitude;
-    double distance;
+    int distance;
+    String bearing;
 
     public Pokemons() {}
 

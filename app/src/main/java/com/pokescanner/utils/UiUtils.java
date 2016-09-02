@@ -7,6 +7,7 @@ import android.widget.EditText;
 import com.pokescanner.helper.ExpirationFilter;
 import com.pokescanner.helper.PokemonListLoader;
 import com.pokescanner.objects.FilterItem;
+import com.pokescanner.objects.NotificationItem;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
 
@@ -29,7 +30,7 @@ public class UiUtils {
             .hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 
-    public static String getSearchTime(int val,Context context) {
+    public static String getSearchTimeString(int val, Context context) {
         int serverRefreshValue = (BASE_DELAY * SettingsUtil.getSettings().getServerRefresh());
         int serverDividedValue = serverRefreshValue / Realm.getDefaultInstance().where(User.class).findAll().size();
         int calculatedValue = hexagonal_number(val) * serverDividedValue;
@@ -38,6 +39,14 @@ public class UiUtils {
         DateTime dt = new DateTime(millis);
         DateTimeFormatter fmt = DateTimeFormat.forPattern("mm:ss");
         return fmt.print(dt);
+    }
+
+    public static long getSearchTimeLong(int val, Context context) {
+        int serverRefreshValue = (BASE_DELAY * SettingsUtil.getSettings().getServerRefresh());
+        int serverDividedValue = serverRefreshValue / Realm.getDefaultInstance().where(User.class).findAll().size();
+        int calculatedValue = hexagonal_number(val) * serverDividedValue;
+        System.out.println(serverRefreshValue + " " + serverDividedValue + " " + calculatedValue);
+        return calculatedValue;
     }
 
     public static boolean isPokemonExpiredFiltered(Pokemons pokemons,Context context) {
@@ -62,5 +71,15 @@ public class UiUtils {
     public static boolean isPokemonFiltered(int number) {
         //lol this is really long but it's simple and to the point
         return PokemonListLoader.getFilteredList().contains(new FilterItem(number));
+    }
+
+    public static boolean isPokemonNotified(Pokemons pokemons) {
+        //lol this is really long but it's simple and to the point
+        return PokemonListLoader.getNotificationList().contains(new NotificationItem(pokemons.getNumber()));
+    }
+
+    public static boolean isPokemonNotified(int number) {
+        //lol this is really long but it's simple and to the point
+        return PokemonListLoader.getNotificationList().contains(new NotificationItem(number));
     }
 }

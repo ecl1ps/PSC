@@ -166,7 +166,7 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
                     temp.setLongitude(pokemons.getLongitude());
 
                     double distance = location.distanceTo(temp);
-                    pokemons.setDistance(distance);
+                    pokemons.setDistance((int)Math.round(distance));
 
                     //ADD OUR POKEMANS TO OUR OUT LIST
                     pokemonRecycler.add(pokemons);

@@ -1,15 +1,20 @@
 package com.pokescanner.utils;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
 /**
  * Created by Brian on 7/25/2016.
  */
 public class PermissionUtils {
+
+    public static final int MY_PERMISSIONS_REQUEST = 111;
+
 
     public static boolean doWeHaveReadWritePermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
@@ -34,5 +39,13 @@ public class PermissionUtils {
 
     public static boolean doWeHaveGPSandLOC(Context context) {
         return  doWeHaveLocationPermission(context) && isGPSEnabled(context);
+    }
+
+    public static void requestWritePermission(Activity activity){
+                ActivityCompat.requestPermissions(activity,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST);
+
+
     }
 }

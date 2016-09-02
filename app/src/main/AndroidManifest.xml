@@ -25,10 +25,11 @@
             android:exported="false"/>
 
         <receiver
-            android:name=".service.ServerPollReceiver"
-            android:process=":remote" >
+            android:name=".service.PokeReceiver" >
             <intent-filter>
                 <action android:name="STOP_ACTION"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
             </intent-filter>
         </receiver>
 
@@ -60,6 +61,9 @@
             android:windowSoftInputMode="adjustPan|adjustResize"/>
         <activity
             android:name=".BlacklistActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize"/>
+        <activity
+            android:name=".NotificationActivity"
             android:windowSoftInputMode="adjustPan|adjustResize"/>
         <activity
             android:name=".MapsActivity"

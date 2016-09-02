@@ -366,4 +366,23 @@
     <string name="chief_devs">Chief developers : \n\nBrianEstrada\nrhari991\nEZTEQ</string>
     <string name="about_us_please_donate">Please consider donating in order to support continued development</string>
     <string name="about_us_free_software">This is a free software, and is available only through Github and /r/PokeScanner. If you received this application from somewhere else, it may contain malicious code. Please support the developers by only downloading the app from official sources.</string>
+    <string name="category_notifications">Notifications</string>
+    <string name="category_notifications_summary">Get notified of nearby pokemon when app isn\'t running</string>
+    <string name="enable_service">Enable Background Service</string>
+    <string name="service_refresh_title">Service Refresh Time</string>
+    <string name="service_refresh_summary">Time between background scans</string>
+    <string name="pokemon_notification_title">Pokemon</string>
+    <string name="pokemon_notification_summary">The pokemon you want to be notified about</string>
+    <string name="service_warning">Lower values will cause higher battery drain!</string>
+    <string name="enable_service_on_boot">Enable On Boot</string>
+    <string name="enable_service_on_boot_summary">Starts background service automatically when device boots</string>
+    <string name="notification_options_category">Notification Options</string>
+    <string name="group_pokemon">Group Pokemon</string>
+    <string name="group_pokemon_summary">Group Pokemon into one notification</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="ringtone">Ringtone</string>
+    <string name="scan_running">Scan running. Should complete in</string>
+    <string name="approx_distance">Approx distance: %dm</string>
+    <string name="scan_complete">Scanning complete. Running every %d minutes</string>
+    <string name="pokealert_backup">Load Pokealert backup</string>
 </resources>

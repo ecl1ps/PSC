@@ -19,7 +19,7 @@ public class AppUpdateLoader extends Thread {
     @Override
     public void run() {
         OkHttpClient httpClient = new OkHttpClient();
-        String apiEndpoint = "https://api.github.com/repos/BrianEstrada/PokeScanner/releases";
+        String apiEndpoint = "https://api.github.com/repos/loserskater/PSC/releases";
         Request request = new Request.Builder()
                 .url(apiEndpoint)
                 .build();

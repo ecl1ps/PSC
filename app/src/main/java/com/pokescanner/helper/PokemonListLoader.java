@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.pokescanner.objects.FilterItem;
+import com.pokescanner.objects.NotificationItem;
 import com.pokescanner.utils.SettingsUtil;
 
 import java.io.IOException;
@@ -19,23 +20,38 @@ import io.realm.Realm;
  */
 public class PokemonListLoader {
 
-    public static ArrayList<FilterItem> getPokelist(Context context) throws IOException {
+    public static final int FILTER = 0;
+    public static final int NOTIFICATION = 1;
+
+    public static ArrayList getPokelist(Context context, int type) throws IOException {
         Realm realm = Realm.getDefaultInstance();
         populatePokemonList(context);
-        ArrayList<FilterItem> returnlist = new ArrayList<>(realm.copyFromRealm(
-                realm.where(FilterItem.class)
-                        .findAll()
-                        .sort("Number")));
+            ArrayList<?> returnlist = new ArrayList<>(realm.copyFromRealm(
+                    realm.where(type == FILTER ? FilterItem.class : NotificationItem.class)
+                            .findAll()
+                            .sort("Number")));
+
         return returnlist;
     }
 
     public static ArrayList<FilterItem> getFilteredList() {
         Realm realm = Realm.getDefaultInstance();
-        ArrayList returnArray =  new ArrayList<>(realm.copyFromRealm(
+        ArrayList<FilterItem> returnArray =  new ArrayList<>(realm.copyFromRealm(
                 realm.where(FilterItem.class)
                 .equalTo("filtered",true)
                 .findAll()
                 .sort("Number")));
+        realm.close();
+        return returnArray;
+    }
+
+    public static ArrayList<NotificationItem> getNotificationList() {
+        Realm realm = Realm.getDefaultInstance();
+        ArrayList<NotificationItem> returnArray =  new ArrayList<>(realm.copyFromRealm(
+                realm.where(NotificationItem.class)
+                        .equalTo("notification",true)
+                        .findAll()
+                        .sort("Number")));
         realm.close();
         return returnArray;
     }
@@ -52,7 +68,7 @@ public class PokemonListLoader {
 
     public static void populatePokemonList(Context context) throws IOException {
         Realm realm = Realm.getDefaultInstance();
-        if (realm.where(FilterItem.class).findAll().size() != 151) {
+        if (realm.where(FilterItem.class).findAll().size() != 151 || realm.where(NotificationItem.class).findAll().size() != 151) {
             InputStream is = context.getAssets().open("pokemons.json");
             int size = is.available();
             byte[] buffer = new byte[size];
@@ -67,6 +83,15 @@ public class PokemonListLoader {
                 @Override
                 public void execute(Realm realm) {
                     realm.copyToRealmOrUpdate(filterItems);
+                }
+            });
+            listType = new TypeToken<ArrayList<NotificationItem>>() {}.getType();
+            final ArrayList<NotificationItem> notificationItem = gson.fromJson(bufferString, listType);
+//            translateNamesIfNeeded(context, notificationItem);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.copyToRealmOrUpdate(notificationItem);
                 }
             });
         }
