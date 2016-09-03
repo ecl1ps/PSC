@@ -6,11 +6,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import com.pokescanner.MapsActivity;
 import com.pokescanner.R;
@@ -19,10 +17,8 @@ import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.DrawableUtils;
 import com.pokescanner.utils.SettingsUtil;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Random;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 
@@ -72,7 +68,6 @@ public class PokeNotifications {
 
     private static void singlePokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
         NotificationCompat.Builder builder = setupNotification(context);
-
         for (Pokemons pokemon : pokemonRecycler) {
             builder.setContentTitle(pokemon.getFormalName(context))
                     .setContentText(String.format(Locale.getDefault(), "%3dm %-9s expires in %s",
@@ -86,7 +81,7 @@ public class PokeNotifications {
         }
     }
 
-    public static void groupPokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
+    private static void groupPokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
         NotificationCompat.Builder builder = setupNotification(context);
         for (Pokemons pokemon : pokemonRecycler) {
             builder.setContentTitle(pokemon.getFormalName(context))

@@ -1,7 +1,6 @@
 package com.pokescanner.settings;
 
 import android.media.RingtoneManager;
-import android.net.Uri;
 
 import com.pokescanner.utils.SettingsUtil;
 
