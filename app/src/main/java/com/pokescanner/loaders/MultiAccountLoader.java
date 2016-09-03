@@ -93,6 +93,7 @@ public class MultiAccountLoader {
         }
     }
 
+
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
@@ -107,6 +108,7 @@ public class MultiAccountLoader {
     private static final Executor THREAD_POOL_EXECUTOR;
 
     static {
+        //Disregard CPU cores and run as many threads as we want! ...well 30
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                 30, 30, 30, TimeUnit.SECONDS,
                 sPoolWorkQueue, sThreadFactory);
