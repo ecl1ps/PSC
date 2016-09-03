@@ -64,8 +64,4 @@ public class User extends RealmObject {
         result.put("status", status);
         return result;
     }
-
-    public long getSeed() {
-        return (long) Objects.hash(new Object[]{this.username + this.password});
-    }
 }
