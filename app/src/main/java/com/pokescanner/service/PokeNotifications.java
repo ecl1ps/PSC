@@ -6,8 +6,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.pokescanner.MapsActivity;
 import com.pokescanner.R;
@@ -18,6 +21,7 @@ import com.pokescanner.utils.SettingsUtil;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Random;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 
@@ -30,6 +34,9 @@ public class PokeNotifications {
     public static final int GROUPED_ID = 312;
     public static final String STOP_SERVICE = "stop_service";
     public static final String RESCAN = "rescan";
+    public static final String INDIVIDUAL_GROUP = "individual_group";
+    public static final String GROUPED_GROUP = "grouped_group";
+    public static final String ONGOING_GROUP = "ongoing_group";
 
 
     public static void ongiongNotification(String content, Context context) {
@@ -48,13 +55,14 @@ public class PokeNotifications {
                 .setContentTitle("Poke Scanner")
                 .setContentText(content)
                 .setOngoing(true)
-                .setPriority(Notification.PRIORITY_MIN);
+                .setPriority(Notification.PRIORITY_MIN)
+                .setGroup(ONGOING_GROUP);
 
         notify(context, ONGOING_ID, builder);
     }
 
-    public static void pokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler){
-        if (SettingsUtil.getSettings().isNotificationGrouped()){
+    public static void pokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
+        if (SettingsUtil.getSettings().isNotificationGrouped()) {
             groupPokeNotification(context, pokemonRecycler);
         } else {
             singlePokeNotification(context, pokemonRecycler);
@@ -64,17 +72,22 @@ public class PokeNotifications {
     private static void singlePokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
         NotificationCompat.Builder builder = setupNotification(context);
 
-        for (Pokemons pokemon : pokemonRecycler){
+        for (Pokemons pokemon : pokemonRecycler) {
             builder.setContentTitle(pokemon.getFormalName(context))
                     .setContentText(String.format(Locale.getDefault(), "%3dm %-9s expires in %s",
                             pokemon.getDistance(),
                             pokemon.getBearing(),
                             DrawableUtils.getExpireTime(pokemon.getExpires())))
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), pokemon.getResourceID(context)));
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), pokemon.getResourceID(context)))
+                    .setGroup(INDIVIDUAL_GROUP);
             notify(context, (int) pokemon.getEncounterid(), builder);
-
             builder = setupSilentNotification(context);
-
+        }
+        if (pokemonRecycler.size() > 1){
+            builder.setContentTitle(pokemonRecycler.size() + " Nearby Pokemon")
+                    .setGroup(INDIVIDUAL_GROUP)
+                    .setGroupSummary(true);
+            notify(context, 12345, builder);
         }
     }
 
@@ -82,32 +95,51 @@ public class PokeNotifications {
 
         NotificationCompat.Builder builder = setupNotification(context)
                 .setContentTitle(pokemonRecycler.size() + " Nearby Pokemon")
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(generateNotificationText(pokemonRecycler, context)))
-                .setContentText(generateNotificationText(pokemonRecycler, context));
+                .setCustomContentView(generateNotificationText(pokemonRecycler, context))
+                .setGroup(GROUPED_GROUP);
 
         notify(context, GROUPED_ID, builder);
     }
 
-    private static String generateNotificationText(ArrayList<Pokemons> pokemonRecycler, Context context) {
+    //Really ugly way of customizing grouped notification
+    private static RemoteViews generateNotificationText(ArrayList<Pokemons> pokemonRecycler, Context context) {
+        RemoteViews notificationView = new RemoteViews(
+                context.getPackageName(),
+                R.layout.notification_grouped_pokemon
+        );
         String newline = "";
-        StringBuilder sb = new StringBuilder();
+        StringBuilder name = new StringBuilder();
+        StringBuilder distance = new StringBuilder();
+        StringBuilder bearing = new StringBuilder();
+        StringBuilder expires = new StringBuilder();
         for (Pokemons pokemon : pokemonRecycler) {
-            sb.append(newline)
-                    .append(String.format(Locale.getDefault(), "%-20s %3dm %-9s expires in %s",
-                            pokemon.getFormalName(context),
-                            pokemon.getDistance(),
-                            pokemon.getBearing(),
-                            DrawableUtils.getExpireTime(pokemon.getExpires())));
+            name.append(newline)
+                    .append(pokemon.getFormalName(context));
+            distance.append(newline)
+                    .append(pokemon.getDistance())
+                    .append("m");
+            bearing.append(newline)
+                    .append(pokemon.getBearing());
+            expires.append(newline)
+                    .append("expires in ")
+                    .append(DrawableUtils.getExpireTime(pokemon.getExpires()));
             newline = "\n";
         }
-        return sb.toString();
+
+        notificationView.setTextViewText(R.id.notiName, name.toString());
+        notificationView.setTextViewText(R.id.notiDistance, distance.toString());
+        notificationView.setTextViewText(R.id.notiBearing, bearing.toString());
+        notificationView.setTextViewText(R.id.notiExpires, expires.toString());
+
+        return notificationView;
     }
 
     private static NotificationCompat.Builder setupNotification(Context context) {
         PendingIntent pendingIntentOpenApp = PendingIntent.getActivity(context, 0, new Intent(context, MapsActivity.class), 0);
         Settings settings = SettingsUtil.getSettings();
         long[] vibrate = {0, 400};
-        return  new NotificationCompat.Builder(context)
+        Log.d("POKE", settings.getNotificationRingtone());
+        return new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.icon)
                 .setContentIntent(pendingIntentOpenApp)
                 .setSound(Uri.parse(settings.getNotificationRingtone()))
@@ -116,12 +148,12 @@ public class PokeNotifications {
 
     private static NotificationCompat.Builder setupSilentNotification(Context context) {
         PendingIntent pendingIntentOpenApp = PendingIntent.getActivity(context, 0, new Intent(context, MapsActivity.class), 0);
-        return  new NotificationCompat.Builder(context)
+        return new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.icon)
                 .setContentIntent(pendingIntentOpenApp);
     }
 
-    private static void notify(Context context, int id, NotificationCompat.Builder builder){
+    private static void notify(Context context, int id, NotificationCompat.Builder builder) {
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.notify(id, builder.build());
     }
