@@ -83,7 +83,7 @@ public class Settings extends RealmObject{
         isServiceEnabled = false;
         serviceRefresh = 1800000;
         isServiceEnabledOnBoot = false;
-        isNotificationGrouped = true;
+        isNotificationGrouped = false;
         notificationRingtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString();
         notificationVibrate = true;
     }
