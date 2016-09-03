@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -18,6 +19,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +52,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import io.realm.Realm;
+
+import static android.app.Activity.RESULT_OK;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     SharedPreferences preferences;
@@ -484,6 +488,19 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         });
 
         builder.show();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && data != null){
+            Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+            Log.d("POKE", "newUri: " + uri.toString());
+            preferences.edit().putString(SettingsUtil.NOTIFICATION_RINGTONE, uri.toString()).apply();
+            Settings settings = SettingsUtil.getSettings();
+            settings.setNotificationRingtone(uri.toString());
+            SettingsUtil.saveSettings(settings);
+        }
     }
 
     @Override
