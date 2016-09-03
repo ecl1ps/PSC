@@ -1,6 +1,6 @@
 # Poke Scanner
 
-<a href="https://github.com/BrianEstrada/PokeScanner"><img src="https://github.com/BrianEstrada/PokeScanner/blob/master/app/src/main/res/mipmap-hdpi/ic_launcher.png?raw=true" align="left" hspace="10" vspace="0"></a>
+<a href="https://github.com/BrianEstrada/PokeScanner"><img src="https://github.com/loserskater/PSC/blob/master/app/src/main/res/mipmap-hdpi/ic_launcher.png?raw=true" align="left" hspace="10" vspace="0"></a>
 
 **Poke Scanner** is an Android scanning application dedicated to helping you locate Pokemons, Gyms and Pokestops in your area with Filter options and more.
 
@@ -18,7 +18,7 @@
 4. Enter your Username and Password (**Warning**:Do not use your main account information)
 5. Press Scan and where ever your camera is centered is where the application will scan
 
-###[Download Section](https://github.com/BrianEstrada/PokeScanner/releases)
+###[Download Section](https://github.com/loserskater/PSC/releases)
 
 ## Main Contributors
 
@@ -56,7 +56,7 @@ Start translating on [Crowdin](https://crowdin.com/project/poke-scanner).
 
 ## Bugs and Feedback
 
-For bugs and questions please use the [Github Issues](https://github.com/BrianEstrada/PokeScanner/issues).
+For bugs and questions please use the [Github Issues](https://github.com/loserskater/PSC/issues).
 
 
 ## Contributions
