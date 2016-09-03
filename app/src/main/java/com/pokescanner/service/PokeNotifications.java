@@ -19,6 +19,7 @@ import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.DrawableUtils;
 import com.pokescanner.utils.SettingsUtil;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
@@ -83,55 +84,47 @@ public class PokeNotifications {
             notify(context, (int) pokemon.getEncounterid(), builder);
             builder = setupSilentNotification(context);
         }
-        if (pokemonRecycler.size() > 1){
-            builder.setContentTitle(pokemonRecycler.size() + " Nearby Pokemon")
-                    .setGroup(INDIVIDUAL_GROUP)
-                    .setGroupSummary(true);
-            notify(context, 12345, builder);
-        }
     }
 
     public static void groupPokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
-
-        NotificationCompat.Builder builder = setupNotification(context)
-                .setContentTitle(pokemonRecycler.size() + " Nearby Pokemon")
-                .setCustomContentView(generateNotificationText(pokemonRecycler, context))
-                .setGroup(GROUPED_GROUP);
-
-        notify(context, GROUPED_ID, builder);
+        NotificationCompat.Builder builder = setupNotification(context);
+        for (Pokemons pokemon : pokemonRecycler) {
+            builder.setContentTitle(pokemon.getFormalName(context))
+                    .setContentText(String.format(Locale.getDefault(), "%3dm %-9s expires in %s",
+                            pokemon.getDistance(),
+                            pokemon.getBearing(),
+                            DrawableUtils.getExpireTime(pokemon.getExpires())))
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), pokemon.getResourceID(context)))
+                    .setGroup(GROUPED_GROUP);
+            notify(context, (int) pokemon.getEncounterid(), builder);
+            builder = setupSilentNotification(context);
+        }
+        if (pokemonRecycler.size() > 1) {
+            builder.setContentTitle(pokemonRecycler.size() + " Nearby Pokemon")
+                    .setStyle(generateNotificationText(pokemonRecycler, context))
+                    .setGroup(GROUPED_GROUP)
+                    .setGroupSummary(true);
+            notify(context, GROUPED_ID, builder);
+        }
     }
 
     //Really ugly way of customizing grouped notification
-    private static RemoteViews generateNotificationText(ArrayList<Pokemons> pokemonRecycler, Context context) {
-        RemoteViews notificationView = new RemoteViews(
-                context.getPackageName(),
-                R.layout.notification_grouped_pokemon
-        );
+    private static NotificationCompat.BigTextStyle generateNotificationText(ArrayList<Pokemons> pokemonRecycler, Context context) {
+        NotificationCompat.BigTextStyle inbox = new NotificationCompat.BigTextStyle();
+        StringBuilder sb = new StringBuilder();
         String newline = "";
-        StringBuilder name = new StringBuilder();
-        StringBuilder distance = new StringBuilder();
-        StringBuilder bearing = new StringBuilder();
-        StringBuilder expires = new StringBuilder();
         for (Pokemons pokemon : pokemonRecycler) {
-            name.append(newline)
-                    .append(pokemon.getFormalName(context));
-            distance.append(newline)
-                    .append(pokemon.getDistance())
-                    .append("m");
-            bearing.append(newline)
-                    .append(pokemon.getBearing());
-            expires.append(newline)
-                    .append("expires in ")
-                    .append(DrawableUtils.getExpireTime(pokemon.getExpires()));
+            sb.append(newline)
+                    .append(String.format("%s %dm  %s  expires in %s",
+                            pokemon.getFormalName(context),
+                            pokemon.getDistance(),
+                            pokemon.getBearing(),
+                            DrawableUtils.getExpireTime(pokemon.getExpires())));
             newline = "\n";
         }
+        inbox.bigText(sb.toString());
 
-        notificationView.setTextViewText(R.id.notiName, name.toString());
-        notificationView.setTextViewText(R.id.notiDistance, distance.toString());
-        notificationView.setTextViewText(R.id.notiBearing, bearing.toString());
-        notificationView.setTextViewText(R.id.notiExpires, expires.toString());
-
-        return notificationView;
+        return inbox;
     }
 
     private static NotificationCompat.Builder setupNotification(Context context) {
