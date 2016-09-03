@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.SystemClock;
 
 import com.pokescanner.loaders.MultiAccountLoader;
+import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.SettingsUtil;
 
 import io.realm.Realm;
@@ -24,7 +25,10 @@ public class PokeReceiver extends BroadcastReceiver {
     public static void cancelAlarm(Context context) {
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(PokeNotifications.ONGOING_ID);
-        SettingsUtil.getSettings().setServiceEnabled(false);
+        //This doesn't work. Need to figure out a way to change the service setting
+//        Settings settings = SettingsUtil.getSettings();
+//        settings.setServiceEnabled(false);
+//        SettingsUtil.saveSettings(settings);
         MultiAccountLoader.cancelAllThreads();
         Intent intent = new Intent(context, PokeReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(context, PokeReceiver.REQUEST_CODE,
