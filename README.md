@@ -1,8 +1,8 @@
-# Poke Scanner
+# PokeScannerLS
 
 <a href="https://github.com/BrianEstrada/PokeScanner"><img src="https://github.com/loserskater/PSC/blob/master/app/src/main/res/mipmap-hdpi/ic_launcher.png?raw=true" align="left" hspace="10" vspace="0"></a>
 
-**Poke Scanner** is an Android scanning application dedicated to helping you locate Pokemons, Gyms and Pokestops in your area with Filter options and more.
+**PokeScannerLS** is an extension of the original [PokeScanner by BrianEstrada](https://github.com/BrianEstrada/PokeScanner). It is an Android scanning application dedicated to helping you locate Pokemons, Gyms and Pokestops in your area with Filter options and more.
 
 <br>
 
