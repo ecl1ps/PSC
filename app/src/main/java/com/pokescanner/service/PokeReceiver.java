@@ -50,7 +50,11 @@ public class PokeReceiver extends BroadcastReceiver {
                 cancelAlarm(context);
             } else if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
                 scheduleAlarm(context);
-            } else if (intent.getAction().equals(PokeNotifications.RESCAN)){
+            } else if (intent.getAction().equals("android.intent.action.MY_PACKAGE_REPLACED")) {
+                if (SettingsUtil.getSettings().isServiceEnabled()) {
+                    scheduleAlarm(context);
+                }
+            } else if (intent.getAction().equals(PokeNotifications.RESCAN)) {
                 Intent i = new Intent(context, PokeService.class);
                 context.startService(i);
             }
