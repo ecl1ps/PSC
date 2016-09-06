@@ -15,6 +15,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.TimeUtils;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import io.fabric.sdk.android.Fabric;
 import io.realm.Realm;
 
 import static com.pokescanner.helper.Generation.makeHexScanMap;
@@ -64,7 +66,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
     }
 
     private void scanForPoke() {
-
+        Fabric.with(this, new Crashlytics());
         Settings currentSettings = SettingsUtil.getSettings();
         int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
         int scanValue = currentSettings.getScanValue();
