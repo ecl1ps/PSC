@@ -74,6 +74,10 @@ public class DrawableUtils
     {
         Settings currentSettings = SettingsUtil.getSettings();
         int scale = currentSettings.getScale();
+        //Check to make sure scale is not 0
+        if (scale == 0){
+            scale = 1;
+        }
 
         Bitmap bm = BitmapFactory.decodeResource(context.getResources(), drawableId).copy(Bitmap.Config.ARGB_8888, true);
 
