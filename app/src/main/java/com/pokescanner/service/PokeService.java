@@ -54,6 +54,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
     private GoogleApiClient mGoogleApiClient;
     List<LatLng> scanMap = new ArrayList<>();
     static LatLng location;
+    static Realm realm;
 
 
     public PokeService() {
@@ -72,7 +73,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
         int scanValue = currentSettings.getScanValue();
         PokeNotifications.ongiongNotification(getString(R.string.scan_running) + " " + UiUtils.getSearchTimeString(SettingsUtil.getSettings().getScanValue(), this), this);
 
-        Realm realm = Realm.getDefaultInstance();
+        realm = Realm.getDefaultInstance();
 
         //get our camera position
         location = getCurrentLocation();
@@ -160,7 +161,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
         String content = String.format(context.getString(R.string.scan_complete), TimeUnit.MILLISECONDS.toMinutes(SettingsUtil.getSettings().getServiceRefresh()));
         PokeNotifications.ongiongNotification(content, context);
 
-        Realm realm = Realm.getDefaultInstance();
+        realm = Realm.getDefaultInstance();
         //Create an arraylist to hold our new pokemon
         ArrayList<Pokemons> pokemon = new ArrayList<>(realm.copyFromRealm(realm.where(Pokemons.class).findAll()));
         //Clear our current list
@@ -209,14 +210,28 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
 
         if (pokemonRecycler.size() > 0) {
             Collections.sort(pokemonRecycler, new PokeDistanceSorter());
-
+            removeAlreadyNotified(pokemonRecycler);
             PokeNotifications.pokeNotification(context, pokemonRecycler);
         }
 
         Log.d("POKE", "Found " + pokemonRecycler.size() + " pokemon");
     }
 
-
+    private static void removeAlreadyNotified(ArrayList<Pokemons> pokemonRecycler) {
+        Settings settings = SettingsUtil.getSettings();
+        ArrayList<Long> notifiedEncounters = settings.getNotifiedEncounters();
+        ArrayList<Pokemons> templist = new ArrayList<>();
+        for (Pokemons pokemon : pokemonRecycler) {
+            if (notifiedEncounters.contains(pokemon.getEncounterid())) {
+                templist.add(pokemon);
+            } else {
+                notifiedEncounters.add(pokemon.getEncounterid());
+            }
+        }
+        pokemonRecycler.removeAll(templist);
+        settings.setNotifiedEncounters(notifiedEncounters);
+        SettingsUtil.saveSettings(settings);
+    }
 
     protected static String getBearing(LatLng user, Location pokemon) {
         double longitude1 = user.longitude;

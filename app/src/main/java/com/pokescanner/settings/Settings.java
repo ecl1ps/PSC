@@ -1,11 +1,15 @@
 package com.pokescanner.settings;
 
 import android.media.RingtoneManager;
+import android.util.Log;
 
 import com.pokescanner.utils.SettingsUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -19,7 +23,7 @@ import lombok.EqualsAndHashCode;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Settings extends RealmObject{
+public class Settings extends RealmObject {
 
     @PrimaryKey
     int key;
@@ -51,6 +55,7 @@ public class Settings extends RealmObject{
     boolean isNotificationGrouped;
     String notificationRingtone;
     boolean notificationVibrate;
+    String notifiedEncounters;
 
     //Used when the app is loaded for the first time
     public Settings() {
@@ -85,6 +90,7 @@ public class Settings extends RealmObject{
         isNotificationGrouped = false;
         notificationRingtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString();
         notificationVibrate = true;
+        notifiedEncounters = null;
     }
 
     //This constructor is used in order to get a non-updating realm object
@@ -116,14 +122,14 @@ public class Settings extends RealmObject{
         this.isNotificationGrouped = settings.isNotificationGrouped;
         this.notificationRingtone = settings.notificationRingtone;
         this.notificationVibrate = settings.notificationVibrate;
+        this.notifiedEncounters = settings.notifiedEncounters;
     }
 
-    public void save()
-    {
+    public void save() {
         SettingsUtil.saveSettings(this);
     }
 
-    public JSONObject toJSONObject() throws JSONException{
+    public JSONObject toJSONObject() throws JSONException {
         JSONObject result = new JSONObject();
         result.put(SettingsUtil.ENABLE_UPDATES, updatesEnabled);
         result.put(SettingsUtil.KEY_BOUNDING_BOX, boundingBoxEnabled);
@@ -152,5 +158,28 @@ public class Settings extends RealmObject{
         result.put(SettingsUtil.NOTIFICATION_RINGTONE, notificationRingtone);
         result.put(SettingsUtil.NOTIFICATION_VIBRATE, notificationVibrate);
         return result;
+    }
+
+    public ArrayList<Long> getNotifiedEncounters() {
+        ArrayList<Long> encounters = new ArrayList<>();
+        if (notifiedEncounters != null) {
+            String[] encountersString = this.notifiedEncounters.split(",");
+            for (String encounter : encountersString) {
+                encounters.add(Long.parseLong(encounter));
+            }
+        }
+        return encounters;
+    }
+
+    public void setNotifiedEncounters(ArrayList<Long> encounters) {
+        StringBuilder sb = new StringBuilder();
+        for (long encounter : encounters) {
+            sb.append(encounter).append(",");
+        }
+        this.notifiedEncounters = sb.toString();
+    }
+
+    public void setServiceEnabled(boolean enabled){
+        this.isServiceEnabled = enabled;
     }
 }
