@@ -261,7 +261,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         bar.setDisplayHomeAsUpEnabled(true);
         bar.setDisplayShowTitleEnabled(true);
         bar.setHomeAsUpIndicator(R.drawable.back_button);
-        bar.setTitle(getPreferenceScreen().getTitle());
+        if (!donation) {
+            bar.setTitle(getPreferenceScreen().getTitle());
+        }
     }
 
     private void setupFilterOptions() {
