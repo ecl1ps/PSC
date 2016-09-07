@@ -40,7 +40,7 @@ android {
         versionCode 31
         versionName "2.1.0"
         multiDexEnabled true
-        archivesBaseName = "PokeScanner_$versionName"
+        archivesBaseName = "PokeScannerLS_$versionName"
     }
     buildTypes {
         release {
