@@ -3,6 +3,15 @@
 
     <header
         android:fragment="com.pokescanner.settings.SettingsFragment"
+        android:title="@string/donate"
+        android:summary="@string/category_donate" >
+        <extra
+            android:name="page"
+            android:value="donatePage"/>
+    </header>
+
+    <header
+        android:fragment="com.pokescanner.settings.SettingsFragment"
         android:title="@string/category_filters"
         android:summary="@string/filter_options_desc" >
         <extra
@@ -60,14 +69,6 @@
         android:title="Load Settings"
         android:summary="Load a previously created backup file"
         android:id="@+id/loadSettings"/>
-
-    <header
-        android:title="About us"
-        android:fragment="com.pokescanner.settings.AboutUsFragment">
-        <extra
-            android:name="page"
-            android:value="aboutUs"/>
-    </header>
 
     <header
         android:title="@string/logout"

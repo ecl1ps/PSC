@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,7 +19,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +33,6 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.android.gms.maps.model.LatLng;
 import com.pokescanner.BlacklistActivity;
 import com.pokescanner.BuildConfig;
 import com.pokescanner.ExpirationFilters;
@@ -264,9 +261,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         bar.setDisplayHomeAsUpEnabled(true);
         bar.setDisplayShowTitleEnabled(true);
         bar.setHomeAsUpIndicator(R.drawable.back_button);
-        if (!donation) {
-            bar.setTitle(getPreferenceScreen().getTitle());
-        }
+        bar.setTitle(getPreferenceScreen().getTitle());
     }
 
     private void setupFilterOptions() {
@@ -332,7 +327,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         });
 
         custom_location = getPreferenceManager().findPreference("customLocation");
-        if (SettingsUtil.getSettings().customLocation != null){
+        if (SettingsUtil.getSettings().customLocation != null) {
             custom_location.setSummary(SettingsUtil.getSettings().getCustomLocation().toString());
         }
         custom_location.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -485,7 +480,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     public void donationIntent() {
-        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.me/brianestrada"));
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.me/loserskater"));
         startActivity(i);
     }
 
