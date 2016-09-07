@@ -11,8 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.LoginEvent;
 import com.pokescanner.events.AuthLoadedEvent;
 import com.pokescanner.loaders.AuthPTCLoader;
 import com.pokescanner.loaders.AuthTokenLoader;
@@ -100,7 +98,6 @@ public class LoginActivity extends AppCompatActivity {
                                 LOGIN_METHOD,
                                 User.STATUS_VALID);
                         realm.copyToRealmOrUpdate(user);
-                        loginLog();
                         showToast(R.string.LOGIN_OK);
                         startMapIntent();
 
@@ -118,27 +115,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
     }
-
-    public void loginLog(){
-        //This method is used to track which login method users are using
-        // We're going to use to see if we should be improving the google login
-        //or not (We are not storing any sort of login information via this method)
-        if (!BuildConfig.DEBUG) {
-            switch (LOGIN_METHOD) {
-                case User.GOOGLE:
-                    Answers.getInstance().logLogin(new LoginEvent()
-                            .putMethod("GOOGLE")
-                            .putSuccess(true));
-                    break;
-                case User.PTC:
-                    Answers.getInstance().logLogin(new LoginEvent()
-                            .putMethod("PTC")
-                            .putSuccess(true));
-                    break;
-            }
-        }
-    }
-
 
     @OnClick(R.id.btnGoogleLogin)
     public void GoogleLogin(View view) {

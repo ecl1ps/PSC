@@ -7,13 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.CustomEvent;
 import com.pokescanner.R;
 
 import java.io.File;
-
-import io.fabric.sdk.android.BuildConfig;
 
 public class AppUpdateDialog {
     public static void downloadAndInstallAppUpdate(Context context, AppUpdate update) {
@@ -42,10 +38,6 @@ public class AppUpdateDialog {
             final DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             final long downloadId = manager.enqueue(request);
 
-            if (!BuildConfig.DEBUG) {
-                Answers.getInstance().logCustom(new CustomEvent("AppSelfUpdate"));
-            }
-
             //set BroadcastReceiver to install app when .apk is downloaded
             BroadcastReceiver onComplete = new BroadcastReceiver() {
                 public void onReceive(Context ctxt, Intent intent) {
@@ -59,6 +51,7 @@ public class AppUpdateDialog {
             //register receiver for when .apk download is complete
             context.registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("We have an error houston");
         }
     }
