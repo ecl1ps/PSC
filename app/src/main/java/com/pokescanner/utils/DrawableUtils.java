@@ -98,11 +98,10 @@ public class DrawableUtils
         {
             timer.setBackgroundColor(getColorFromType(type, context));
         }
-
         timer.setText(text);
         icon.setImageBitmap(bm);
 
-        if (timer.length() == 0)
+        if (timer.length() == 0 || text.matches("Expired"))
         {
             timer.setVisibility(View.GONE);
         }
