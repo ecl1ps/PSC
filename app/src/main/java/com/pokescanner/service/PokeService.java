@@ -75,8 +75,12 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
 
         realm = Realm.getDefaultInstance();
 
-        //get our camera position
-        location = getCurrentLocation();
+        //get our saved or current position
+        if (currentSettings.isCustomLocationEnabled()) {
+            location = currentSettings.getCustomLocation();
+        } else {
+            location = getCurrentLocation();
+        }
 
         if (location != null) {
             scanMap = makeHexScanMap(location, scanValue, 1, new ArrayList<LatLng>());
@@ -118,7 +122,6 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
         }
         return null;
     }
-
 
 
     @Override

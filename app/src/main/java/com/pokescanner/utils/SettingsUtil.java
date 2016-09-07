@@ -34,6 +34,9 @@ public class SettingsUtil {
     public static final String GROUP_POKEMON = "groupPokemon";
     public static final String NOTIFICATION_RINGTONE = "notificationRingtone";
     public static final String NOTIFICATION_VIBRATE = "notificationVibrate";
+    public static final String ENABLE_CUSTOM_LOCATION = "customLocationEnabled";
+    public static final String CUSTOM_LOCATION = "customLocation";
+
 
     public static Settings getSettings()
     {

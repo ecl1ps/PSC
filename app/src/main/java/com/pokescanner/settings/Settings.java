@@ -3,6 +3,7 @@ package com.pokescanner.settings;
 import android.media.RingtoneManager;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.pokescanner.utils.SettingsUtil;
 
 import org.json.JSONException;
@@ -56,6 +57,8 @@ public class Settings extends RealmObject {
     String notificationRingtone;
     boolean notificationVibrate;
     String notifiedEncounters;
+    boolean isCustomLocationEnabled;
+    String customLocation;
 
     //Used when the app is loaded for the first time
     public Settings() {
@@ -91,6 +94,8 @@ public class Settings extends RealmObject {
         notificationRingtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString();
         notificationVibrate = true;
         notifiedEncounters = null;
+        isCustomLocationEnabled = false;
+        customLocation = null;
     }
 
     //This constructor is used in order to get a non-updating realm object
@@ -123,6 +128,8 @@ public class Settings extends RealmObject {
         this.notificationRingtone = settings.notificationRingtone;
         this.notificationVibrate = settings.notificationVibrate;
         this.notifiedEncounters = settings.notifiedEncounters;
+        this.isCustomLocationEnabled = settings.isCustomLocationEnabled;
+        this.customLocation = settings.customLocation;
     }
 
     public void save() {
@@ -157,13 +164,16 @@ public class Settings extends RealmObject {
         result.put(SettingsUtil.GROUP_POKEMON, isNotificationGrouped);
         result.put(SettingsUtil.NOTIFICATION_RINGTONE, notificationRingtone);
         result.put(SettingsUtil.NOTIFICATION_VIBRATE, notificationVibrate);
+        result.put(SettingsUtil.ENABLE_CUSTOM_LOCATION, isCustomLocationEnabled);
+        result.put(SettingsUtil.CUSTOM_LOCATION, customLocation);
         return result;
     }
 
+    //Realm doesn't like these types so let's just store them as strings.
     public ArrayList<Long> getNotifiedEncounters() {
         ArrayList<Long> encounters = new ArrayList<>();
         if (notifiedEncounters != null) {
-            String[] encountersString = this.notifiedEncounters.split(",");
+            String[] encountersString = notifiedEncounters.split(",");
             for (String encounter : encountersString) {
                 encounters.add(Long.parseLong(encounter));
             }
@@ -179,7 +189,29 @@ public class Settings extends RealmObject {
         this.notifiedEncounters = sb.toString();
     }
 
-    public void setServiceEnabled(boolean enabled){
+    public LatLng getCustomLocation() {
+        if (customLocation != null) {
+            String[] loc = customLocation.split(",");
+            double lat = Double.parseDouble(loc[0]);
+            double lon = Double.parseDouble(loc[1]);
+            return new LatLng(lat, lon);
+        }
+        return null;
+    }
+
+    public String getCustomLocationString(){
+        return customLocation;
+    }
+
+    public void setCustomLocation(LatLng location){
+        StringBuilder sb = new StringBuilder();
+        sb.append(location.latitude)
+                .append(",")
+                .append(location.longitude);
+        this.customLocation = sb.toString();
+    }
+
+    public void setServiceEnabled(boolean enabled) {
         this.isServiceEnabled = enabled;
     }
 }

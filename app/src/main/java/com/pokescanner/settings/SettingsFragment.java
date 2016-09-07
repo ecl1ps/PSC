@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +31,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.model.LatLng;
 import com.pokescanner.BlacklistActivity;
 import com.pokescanner.BuildConfig;
 import com.pokescanner.ExpirationFilters;
@@ -56,6 +62,7 @@ import io.realm.Realm;
 import static android.app.Activity.RESULT_OK;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private static final int CUSTOM_LOCATION_REQUEST = 1111;
     SharedPreferences preferences;
     Preference scan_dialog;
     Preference gym_cp_filter;
@@ -69,6 +76,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     Preference pokemon_notification;
     ListPreference service_refresh_rate;
     SwitchPreference enable_service;
+    Preference custom_location;
     Realm realm;
     private Context mContext;
     private View rootView;
@@ -147,6 +155,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 .putBoolean(SettingsUtil.GROUP_POKEMON, currentSettings.isNotificationGrouped())
                 .putString(SettingsUtil.NOTIFICATION_RINGTONE, currentSettings.getNotificationRingtone())
                 .putBoolean(SettingsUtil.NOTIFICATION_VIBRATE, currentSettings.isNotificationVibrate())
+                .putBoolean(SettingsUtil.ENABLE_CUSTOM_LOCATION, currentSettings.isCustomLocationEnabled())
+                .putString(SettingsUtil.CUSTOM_LOCATION, currentSettings.getCustomLocationString())
                 .apply();
 
         realm = Realm.getDefaultInstance();
@@ -286,6 +296,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         });
     }
 
+
     private void setupNotificationOptions() {
         enable_service = (SwitchPreference) getPreferenceManager().findPreference("enableService");
         enable_service.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -320,6 +331,24 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             }
         });
 
+        custom_location = getPreferenceManager().findPreference("customLocation");
+        if (SettingsUtil.getSettings().customLocation != null){
+            custom_location.setSummary(SettingsUtil.getSettings().getCustomLocation().toString());
+        }
+        custom_location.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                try {
+                    startActivityForResult(builder.build(getActivity()), CUSTOM_LOCATION_REQUEST);
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+                return true;
+            }
+        });
     }
 
     private void setupMapOptions() {
@@ -493,14 +522,21 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null){
-            Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-            Log.d("POKE", "newUri: " + uri.toString());
-            preferences.edit().putString(SettingsUtil.NOTIFICATION_RINGTONE, uri.toString()).apply();
-            Settings settings = SettingsUtil.getSettings();
-            settings.setNotificationRingtone(uri.toString());
-            SettingsUtil.saveSettings(settings);
+        Settings settings = SettingsUtil.getSettings();
+        if (requestCode == CUSTOM_LOCATION_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(mContext, data);
+                settings.setCustomLocation(place.getLatLng());
+                custom_location.setSummary(place.getLatLng().toString());
+            }
+        } else {
+            if (resultCode == RESULT_OK && data != null) {
+                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                preferences.edit().putString(SettingsUtil.NOTIFICATION_RINGTONE, uri.toString()).apply();
+                settings.setNotificationRingtone(uri.toString());
+            }
         }
+        SettingsUtil.saveSettings(settings);
     }
 
     @Override
@@ -535,6 +571,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         newSettings.setNotificationGrouped(sharedPreferences.getBoolean(SettingsUtil.GROUP_POKEMON, newSettings.isNotificationGrouped()));
         newSettings.setNotificationRingtone(sharedPreferences.getString(SettingsUtil.NOTIFICATION_RINGTONE, newSettings.getNotificationRingtone()));
         newSettings.setNotificationVibrate(sharedPreferences.getBoolean(SettingsUtil.NOTIFICATION_VIBRATE, newSettings.isNotificationVibrate()));
+        newSettings.setCustomLocationEnabled(sharedPreferences.getBoolean(SettingsUtil.ENABLE_CUSTOM_LOCATION, newSettings.isCustomLocationEnabled()));
         // Finally save the new settings
         SettingsUtil.saveSettings(newSettings);
     }

@@ -386,4 +386,7 @@
     <string name="approx_distance">Approx distance: %dm</string>
     <string name="scan_complete">Scanning complete. Running every %d minutes</string>
     <string name="pokealert_backup">Load Pokealert backup</string>
+    <string name="custom_location">Custom Location</string>
+    <string name="location">Location</string>
+    <string name="location_not_set">No location set</string>
 </resources>
