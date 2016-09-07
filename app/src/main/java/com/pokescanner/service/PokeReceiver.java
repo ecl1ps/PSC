@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 
 import com.pokescanner.loaders.MultiAccountLoader;
 import com.pokescanner.settings.Settings;
@@ -25,10 +26,11 @@ public class PokeReceiver extends BroadcastReceiver {
     public static void cancelAlarm(Context context) {
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(PokeNotifications.ONGOING_ID);
-        //This doesn't work. Need to figure out a way to change the service setting
-//        Settings settings = SettingsUtil.getSettings();
-//        settings.setServiceEnabled(false);
-//        SettingsUtil.saveSettings(settings);
+        Settings settings = SettingsUtil.getSettings();
+        settings.setServiceEnabled(false);
+        SettingsUtil.saveSettings(settings);
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit().putBoolean(SettingsUtil.ENABLE_SERVICE, false).apply();
         MultiAccountLoader.cancelAllThreads();
         Intent intent = new Intent(context, PokeReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(context, PokeReceiver.REQUEST_CODE,
