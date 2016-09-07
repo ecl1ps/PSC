@@ -77,7 +77,12 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
 
         //get our saved or current position
         if (currentSettings.isCustomLocationEnabled()) {
-            location = currentSettings.getCustomLocation();
+            if (currentSettings.getCustomLocation() != null) {
+                location = currentSettings.getCustomLocation();
+            } else {
+                PokeNotifications.ongiongNotification(getString(R.string.custom_location_invalid), this);
+                location = getCurrentLocation();
+            }
         } else {
             location = getCurrentLocation();
         }
