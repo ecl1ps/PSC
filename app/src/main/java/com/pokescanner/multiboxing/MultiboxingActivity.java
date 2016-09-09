@@ -233,7 +233,9 @@ public class MultiboxingActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "No file found", Toast.LENGTH_SHORT).show();
             }
-            bw.close();
+            if (bw != null) {
+                bw.close();
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
