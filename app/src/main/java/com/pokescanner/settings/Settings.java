@@ -49,6 +49,7 @@ public class Settings {
     public static final String ENABLE_CUSTOM_LOCATION = "customLocationEnabled";
     public static final String CUSTOM_LOCATION = "customLocation";
     public static final String NOTIFIED_ENCOUNTERS = "notifiedEncounters";
+    public static final String HIDE_TIMER = "hideTimer";
 
     private static final ArrayList<String> stringPrefs = new ArrayList<>(Arrays.asList(
             SERVER_REFRESH_RATE,
@@ -98,6 +99,7 @@ public class Settings {
     public static final boolean DEFAULT_customLocationEnabled = false;
     public static final String DEFAULT_customLocation = null;
     public static final String DEFAULT_notifiedEncounters = null;
+    public static final boolean DEFAULT_hideTimer = false;
 
     public static SharedPreferences getPrefs(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);

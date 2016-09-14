@@ -390,4 +390,6 @@
     <string name="location">Location</string>
     <string name="location_not_set">No location set</string>
     <string name="custom_location_invalid">No custom location set! Using current location.</string>
+    <string name="hide_timer">Hide Timer</string>
+    <string name="hide_timer_summary">Hides timer above icons on the map</string>
 </resources>

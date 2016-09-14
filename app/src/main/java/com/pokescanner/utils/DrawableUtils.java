@@ -99,9 +99,9 @@ public class DrawableUtils
         timer.setText(text);
         icon.setImageBitmap(bm);
 
-        if (timer.length() == 0 || text.matches("Expired"))
+        if (timer.length() == 0 || text.matches("Expired") || Settings.getPreferenceBoolean(context, Settings.HIDE_TIMER))
         {
-            timer.setVisibility(View.GONE);
+            timer.setVisibility(View.INVISIBLE);
         }
 
         pokeView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),

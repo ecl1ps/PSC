@@ -26,4 +26,12 @@
         android:layout_height="match_parent"
         android:layout_width="wrap_content" />
 
+    <SwitchPreference
+        android:key="hideTimer"
+        android:title="@string/hide_timer"
+        android:summary="@string/hide_timer_summary"
+        android:defaultValue="false"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content" />
+
 </PreferenceScreen>
