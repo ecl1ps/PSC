@@ -27,10 +27,14 @@ import io.realm.Realm;
  * Created by Brian on 7/22/2016.
  */
 public class NotificationActivity extends AppCompatActivity implements TextWatcher {
-    @BindView(R.id.etSearch) EditText etSearch;
-    @BindView(R.id.filterRecycler) RecyclerView notificationRecycler;
-    @BindView(R.id.btnNone) Button btnNone;
-    @BindView(R.id.btnAll) Button btnAll;
+    @BindView(R.id.etSearch)
+    EditText etSearch;
+    @BindView(R.id.filterRecycler)
+    RecyclerView notificationRecycler;
+    @BindView(R.id.btnNone)
+    Button btnNone;
+    @BindView(R.id.btnAll)
+    Button btnAll;
 
     ArrayList<NotificationItem> notificationItems = new ArrayList<>();
     RecyclerView.Adapter mAdapter;
@@ -55,7 +59,7 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
         setupRecycler();
     }
 
-    public void setupRecycler(){
+    public void setupRecycler() {
         RecyclerView.LayoutManager mLayoutManager;
         notificationRecycler.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
@@ -83,7 +87,7 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
         finishActivity();
     }
 
-    public void finishActivity(){
+    public void finishActivity() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -95,14 +99,15 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
 
 
     @OnClick(R.id.btnNone)
-    public void selectNoneButton(){
+    public void selectNoneButton() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 notificationItems.clear();
                 notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class)
-                        .findAll()));
-                for (NotificationItem notificationItem: notificationItems) {
+                        .findAll()
+                        .sort("Number")));
+                for (NotificationItem notificationItem : notificationItems) {
                     notificationItem.setNotification(false);
                 }
                 mAdapter.notifyDataSetChanged();
@@ -111,14 +116,15 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
     }
 
     @OnClick(R.id.btnAll)
-    public void selectAllButton(){
+    public void selectAllButton() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 notificationItems.clear();
                 notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class)
-                        .findAll()));
-                for (NotificationItem notificationItem: notificationItems) {
+                        .findAll()
+                        .sort("Number")));
+                for (NotificationItem notificationItem : notificationItems) {
                     notificationItem.setNotification(true);
                 }
                 mAdapter.notifyDataSetChanged();
@@ -138,12 +144,12 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
                 public void execute(Realm realm) {
                     notificationItems.clear();
                     notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class)
-                            .contains("Name",charSequence.toString(), Case.INSENSITIVE)
+                            .contains("Name", charSequence.toString(), Case.INSENSITIVE)
                             .findAll()));
                     mAdapter.notifyDataSetChanged();
                 }
             });
-        }else {
+        } else {
             notificationItems.clear();
             notificationItems.addAll(realm.copyFromRealm(realm.where(NotificationItem.class).findAll()));
             mAdapter.notifyDataSetChanged();

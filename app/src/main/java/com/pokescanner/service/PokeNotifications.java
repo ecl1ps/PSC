@@ -8,14 +8,12 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.pokescanner.MapsActivity;
 import com.pokescanner.R;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.DrawableUtils;
-import com.pokescanner.utils.SettingsUtil;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -59,7 +57,7 @@ public class PokeNotifications {
     }
 
     public static void pokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
-        if (SettingsUtil.getSettings().isNotificationGrouped()) {
+        if (Settings.getPreferenceBoolean(context, Settings.GROUP_POKEMON)) {
             groupPokeNotification(context, pokemonRecycler);
         } else {
             singlePokeNotification(context, pokemonRecycler);
@@ -124,14 +122,12 @@ public class PokeNotifications {
 
     private static NotificationCompat.Builder setupNotification(Context context) {
         PendingIntent pendingIntentOpenApp = PendingIntent.getActivity(context, 0, new Intent(context, MapsActivity.class), 0);
-        Settings settings = SettingsUtil.getSettings();
         long[] vibrate = {0, 400};
-        Log.d("POKE", settings.getNotificationRingtone());
         return new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.icon)
                 .setContentIntent(pendingIntentOpenApp)
-                .setSound(Uri.parse(settings.getNotificationRingtone()))
-                .setVibrate(settings.isNotificationVibrate() ? vibrate : new long[]{0});
+                .setSound(Uri.parse(Settings.getPreferenceString(context, Settings.NOTIFICATION_RINGTONE)))
+                .setVibrate(Settings.getPreferenceBoolean(context, Settings.NOTIFICATION_VIBRATE) ? vibrate : new long[]{0});
     }
 
     private static NotificationCompat.Builder setupSilentNotification(Context context) {

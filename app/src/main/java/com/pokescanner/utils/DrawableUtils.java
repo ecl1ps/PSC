@@ -48,7 +48,6 @@ public class DrawableUtils
     }
 
     public static  Bitmap getBitmap(Context context, String URI) {
-        int unitScale = SettingsUtil.getSettings().getScale();
         int resourceID = context.getResources().getIdentifier(URI, "drawable", context.getPackageName());
         return DrawableUtils.getBitmapFromView(resourceID, "", context,100);
     }
@@ -62,7 +61,7 @@ public class DrawableUtils
     public static int getResourceID(int pokemonid,Context context) {
         String uri = "p" + pokemonid;
 
-        if (SettingsUtil.getSettings().isShuffleIcons()) {
+        if (Settings.getPreferenceBoolean(context, Settings.SHUFFLE_ICONS)) {
             uri = "ps" + pokemonid;
         }
 
@@ -72,8 +71,7 @@ public class DrawableUtils
 
     public static Bitmap getBitmapFromView(int drawableId, String text, Context context,int type)
     {
-        Settings currentSettings = SettingsUtil.getSettings();
-        int scale = currentSettings.getScale();
+        int scale = Settings.getPreferenceInt(context, Settings.POKEMON_ICON_SCALE);
         //Check to make sure scale is not 0
         if (scale == 0){
             scale = 1;
@@ -87,7 +85,7 @@ public class DrawableUtils
         TextView timer = (TextView) pokeView.findViewById(R.id.timer);
         ImageView icon = (ImageView) pokeView.findViewById(R.id.icon);
 
-        if (currentSettings.isUseOldMapMarker())
+        if (Settings.getPreferenceBoolean(context, Settings.KEY_OLD_MARKER))
         {
             timer.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent));
             timer.setTextColor(ContextCompat.getColor(context, android.R.color.black));

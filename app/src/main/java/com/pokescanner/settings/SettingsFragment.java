@@ -3,15 +3,12 @@ package com.pokescanner.settings;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.support.v7.app.ActionBar;
@@ -47,7 +44,6 @@ import com.pokescanner.updater.AppUpdate;
 import com.pokescanner.updater.AppUpdateDialog;
 import com.pokescanner.updater.AppUpdateLoader;
 import com.pokescanner.utils.PermissionUtils;
-import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -58,9 +54,8 @@ import io.realm.Realm;
 
 import static android.app.Activity.RESULT_OK;
 
-public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsFragment extends PreferenceFragment {
     private static final int CUSTOM_LOCATION_REQUEST = 1111;
-    SharedPreferences preferences;
     Preference scan_dialog;
     Preference gym_cp_filter;
     Preference expiration_filter;
@@ -121,40 +116,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         rootView = inflater.inflate(R.layout.settings_page, container, false);
         mContext = getActivity();
         setupToolbar();
-        preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        preferences.registerOnSharedPreferenceChangeListener(this);
-        Settings currentSettings = SettingsUtil.getSettings();
-
-        preferences.edit()
-                .putBoolean(SettingsUtil.ENABLE_UPDATES, currentSettings.isUpdatesEnabled())
-                .putBoolean(SettingsUtil.ENABLE_LOW_MEMORY, currentSettings.isEnableLowMemory())
-                .putBoolean(SettingsUtil.KEY_BOUNDING_BOX, currentSettings.isBoundingBoxEnabled())
-                .putBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, currentSettings.isForceEnglishNames())
-                .putInt(SettingsUtil.SCAN_VALUE, currentSettings.getScanValue())
-                .putString(SettingsUtil.SERVER_REFRESH_RATE, String.valueOf(currentSettings.getServerRefresh()))
-                .putString(SettingsUtil.MAP_REFRESH_RATE, String.valueOf(currentSettings.getMapRefresh()))
-                .putString(SettingsUtil.POKEMON_ICON_SCALE, String.valueOf(currentSettings.getScale()))
-                .putString(SettingsUtil.LAST_USERNAME, currentSettings.getLastUsername())
-                .putBoolean(SettingsUtil.KEY_OLD_MARKER, currentSettings.isUseOldMapMarker())
-                .putBoolean(SettingsUtil.SHUFFLE_ICONS, currentSettings.isShuffleIcons())
-                .putBoolean(SettingsUtil.SHOW_LURED_POKEMON, currentSettings.isShowLuredPokemon())
-                .putBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, currentSettings.isNeutralGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_YELLOW_GYMS, currentSettings.isYellowGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_BLUE_GYMS, currentSettings.isBlueGymsEnabled())
-                .putBoolean(SettingsUtil.SHOW_RED_GYMS, currentSettings.isRedGymsEnabled())
-                .putInt(SettingsUtil.GUARD_MIN_CP, currentSettings.getGuardPokemonMinCp())
-                .putInt(SettingsUtil.GUARD_MAX_CP, currentSettings.getGuardPokemonMaxCp())
-                .putBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, currentSettings.isLuredPokestopsEnabled())
-                .putBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, currentSettings.isNormalPokestopsEnabled())
-                .putBoolean(SettingsUtil.ENABLE_SERVICE, currentSettings.isServiceEnabled())
-                .putString(SettingsUtil.SERVICE_REFRESH, String.valueOf(currentSettings.getServiceRefresh()))
-                .putBoolean(SettingsUtil.ENABLE_SERVICE_ON_BOOT, currentSettings.isServiceEnabledOnBoot())
-                .putBoolean(SettingsUtil.GROUP_POKEMON, currentSettings.isNotificationGrouped())
-                .putString(SettingsUtil.NOTIFICATION_RINGTONE, currentSettings.getNotificationRingtone())
-                .putBoolean(SettingsUtil.NOTIFICATION_VIBRATE, currentSettings.isNotificationVibrate())
-                .putBoolean(SettingsUtil.ENABLE_CUSTOM_LOCATION, currentSettings.isCustomLocationEnabled())
-                .putString(SettingsUtil.CUSTOM_LOCATION, currentSettings.getCustomLocationString())
-                .apply();
 
         realm = Realm.getDefaultInstance();
 
@@ -186,8 +147,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     public static void searchRadiusDialog(final Context context) {
-        int scanValue = SettingsUtil.getSettings().getScanValue();
-
+        int scanValue = Settings.getPreferenceInt(context, Settings.SCAN_VALUE);
         final AppCompatDialog dialog = new AppCompatDialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_search_radius);
@@ -232,11 +192,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             public void onClick(View view) {
                 int savedValue = seekBar.getProgress();
                 int scanOut = (savedValue == 0 ? 1 : savedValue);
-
-                PreferenceManager.getDefaultSharedPreferences(context)
-                        .edit()
-                        .putInt(SettingsUtil.SCAN_VALUE, scanOut)
-                        .apply();
+                Settings.setPreference(context, Settings.SCAN_VALUE, scanOut);
                 dialog.dismiss();
             }
         });
@@ -329,8 +285,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         });
 
         custom_location = getPreferenceManager().findPreference("customLocation");
-        if (SettingsUtil.getSettings().customLocation != null) {
-            custom_location.setSummary(SettingsUtil.getSettings().getCustomLocation().toString());
+        if (Settings.getCustomLocation(mContext) != null) {
+            custom_location.setSummary(Settings.getCustomLocationString(mContext));
         }
         custom_location.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -492,7 +448,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
         final EditText input = new EditText(getActivity());
 
-        input.setText(preferences.getString(SettingsUtil.SERVER_REFRESH_RATE, "10"));
+        input.setText(Settings.getPreferenceInt(mContext, Settings.SERVER_REFRESH_RATE));
 
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         builder.setView(input);
@@ -500,9 +456,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                preferences.edit()
-                        .putString(SettingsUtil.SERVER_REFRESH_RATE, input.getText().toString())
-                        .apply();
+                Settings.setPreference(mContext, Settings.SERVER_REFRESH_RATE, input.getText().toString());
             }
         });
 
@@ -519,59 +473,16 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Settings settings = SettingsUtil.getSettings();
+
         if (requestCode == CUSTOM_LOCATION_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(mContext, data);
-                settings.setCustomLocation(place.getLatLng());
+                Settings.setCustomLocation(mContext, place.getLatLng());
                 custom_location.setSummary(place.getLatLng().toString());
             }
-        } else {
-            if (resultCode == RESULT_OK && data != null) {
-                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                preferences.edit().putString(SettingsUtil.NOTIFICATION_RINGTONE, uri.toString()).apply();
-                settings.setNotificationRingtone(uri.toString());
-            }
         }
-        SettingsUtil.saveSettings(settings);
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Settings newSettings = SettingsUtil.getSettings();
-        newSettings.setUpdatesEnabled(sharedPreferences.getBoolean(SettingsUtil.ENABLE_UPDATES, newSettings.isUpdatesEnabled()));
-        newSettings.setBoundingBoxEnabled(sharedPreferences.getBoolean(SettingsUtil.KEY_BOUNDING_BOX, newSettings.isBoundingBoxEnabled()));
-        newSettings.setDrivingModeEnabled(sharedPreferences.getBoolean(SettingsUtil.DRIVING_MODE, newSettings.isDrivingModeEnabled()));
-        newSettings.setForceEnglishNames(sharedPreferences.getBoolean(SettingsUtil.FORCE_ENGLISH_NAMES, newSettings.isForceEnglishNames()));
-        newSettings.setEnableLowMemory(sharedPreferences.getBoolean(SettingsUtil.ENABLE_LOW_MEMORY, newSettings.isEnableLowMemory()));
-        newSettings.setScanValue(sharedPreferences.getInt(SettingsUtil.SCAN_VALUE, newSettings.getScanValue()));
-        // TODO: change those values to int
-        newSettings.setServerRefresh(Integer.valueOf(sharedPreferences.getString(SettingsUtil.SERVER_REFRESH_RATE, String.valueOf(newSettings.getServerRefresh()))));
-        newSettings.setScale(Integer.valueOf(sharedPreferences.getString(SettingsUtil.POKEMON_ICON_SCALE, String.valueOf(newSettings.getScale()))));
-        newSettings.setMapRefresh(Integer.valueOf(sharedPreferences.getString(SettingsUtil.MAP_REFRESH_RATE, String.valueOf(newSettings.getMapRefresh()))));
-        // END TODO
-        newSettings.setLastUsername(sharedPreferences.getString(SettingsUtil.LAST_USERNAME, newSettings.getLastUsername()));
-        newSettings.setUseOldMapMarker(sharedPreferences.getBoolean(SettingsUtil.KEY_OLD_MARKER, newSettings.isUseOldMapMarker()));
-        newSettings.setShuffleIcons(sharedPreferences.getBoolean(SettingsUtil.SHUFFLE_ICONS, newSettings.isShuffleIcons()));
-        newSettings.setShowLuredPokemon(sharedPreferences.getBoolean(SettingsUtil.SHOW_LURED_POKEMON, newSettings.isShowLuredPokemon()));
-        newSettings.setNeutralGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_NEUTRAL_GYMS, newSettings.isNeutralGymsEnabled()));
-        newSettings.setYellowGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_YELLOW_GYMS, newSettings.isYellowGymsEnabled()));
-        newSettings.setBlueGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_BLUE_GYMS, newSettings.isBlueGymsEnabled()));
-        newSettings.setRedGymsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_RED_GYMS, newSettings.isRedGymsEnabled()));
-        newSettings.setGuardPokemonMinCp(sharedPreferences.getInt(SettingsUtil.GUARD_MIN_CP, newSettings.getGuardPokemonMinCp()));
-        newSettings.setGuardPokemonMaxCp(sharedPreferences.getInt(SettingsUtil.GUARD_MAX_CP, newSettings.getGuardPokemonMaxCp()));
-        newSettings.setLuredPokestopsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_LURED_POKESTOPS, newSettings.isLuredPokestopsEnabled()));
-        newSettings.setNormalPokestopsEnabled(sharedPreferences.getBoolean(SettingsUtil.SHOW_NORMAL_POKESTOPS, newSettings.isNormalPokestopsEnabled()));
-        newSettings.setServiceEnabled(sharedPreferences.getBoolean(SettingsUtil.ENABLE_SERVICE, newSettings.isServiceEnabled()));
-        newSettings.setServiceRefresh(Integer.valueOf(sharedPreferences.getString(SettingsUtil.SERVICE_REFRESH, String.valueOf(newSettings.getServiceRefresh()))));
-        newSettings.setServiceEnabledOnBoot(sharedPreferences.getBoolean(SettingsUtil.ENABLE_SERVICE_ON_BOOT, newSettings.isServiceEnabledOnBoot()));
-        newSettings.setNotificationGrouped(sharedPreferences.getBoolean(SettingsUtil.GROUP_POKEMON, newSettings.isNotificationGrouped()));
-        newSettings.setNotificationRingtone(sharedPreferences.getString(SettingsUtil.NOTIFICATION_RINGTONE, newSettings.getNotificationRingtone()));
-        newSettings.setNotificationVibrate(sharedPreferences.getBoolean(SettingsUtil.NOTIFICATION_VIBRATE, newSettings.isNotificationVibrate()));
-        newSettings.setCustomLocationEnabled(sharedPreferences.getBoolean(SettingsUtil.ENABLE_CUSTOM_LOCATION, newSettings.isCustomLocationEnabled()));
-        // Finally save the new settings
-        SettingsUtil.saveSettings(newSettings);
-    }
 
     @Override
     public void onStart() {

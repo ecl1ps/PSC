@@ -31,8 +31,8 @@ public class FilterItem extends RealmObject{
 
     public JSONObject toJSONObject() throws JSONException {
         JSONObject result = new JSONObject();
-        result.put("number", Number);
-        result.put("name", Name);
+        result.put("Number", Number);
+        result.put("Name", Name);
         result.put("filtered", filtered);
         return result;
     }

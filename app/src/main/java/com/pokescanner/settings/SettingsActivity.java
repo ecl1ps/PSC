@@ -15,18 +15,21 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.pokescanner.LoginActivity;
 import com.pokescanner.R;
 import com.pokescanner.helper.PokemonListLoader;
 import com.pokescanner.multiboxing.MultiboxingActivity;
 import com.pokescanner.objects.FilterItem;
 import com.pokescanner.objects.Gym;
+import com.pokescanner.objects.NotificationItem;
 import com.pokescanner.objects.PokeStop;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
 import com.pokescanner.utils.FileUtils;
+import com.pokescanner.utils.JsonUtils;
 import com.pokescanner.utils.PermissionUtils;
-import com.pokescanner.utils.SettingsUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,15 +39,17 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.exceptions.RealmException;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
-    private static final String coreSettingsKey = "coreSettings";
-    private static final String accountsKey = "accounts";
-    private static final String pokemonFiltersKey = "pokemonFilters";
+    private static final String CORE_SETTINGS_KEY = "coreSettings";
+    private static final String ACCOUNTS_KEY = "accounts";
+    private static final String POKEMON_FILTERS_KEY = "pokemonFilters";
+    private static final String POKEMON_NOTIFICATION_KEY = "pokemonNotifications";
 
     private Realm realm;
     private Context mContext;
@@ -72,17 +77,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     public void onHeaderClick(Header header, int position) {
         super.onHeaderClick(header, position);
-        if(header.id == R.id.logoutHeader)
+        if (header.id == R.id.logoutHeader)
             logOut();
-        else if(header.id == R.id.multiboxingHeader)
-        {
+        else if (header.id == R.id.multiboxingHeader) {
             Intent i = new Intent(mContext, MultiboxingActivity.class);
             startActivity(i);
-        }
-        else if(header.id == R.id.createBackup)
+        } else if (header.id == R.id.createBackup)
             createBackupContents();
-        else if(header.id == R.id.loadSettings) {
-            if(PermissionUtils.doWeHaveReadExternalStoragePermission(mContext))
+        else if (header.id == R.id.loadSettings) {
+            if (PermissionUtils.doWeHaveReadExternalStoragePermission(mContext))
                 openFilePicker();
             else
                 getReadPermission();
@@ -92,21 +95,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
-        startActivityForResult(intent,PICKFILE_RESULT_CODE);
+        startActivityForResult(intent, PICKFILE_RESULT_CODE);
     }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch(requestCode){
+        switch (requestCode) {
             case PICKFILE_RESULT_CODE:
-                if(resultCode==RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     try {
                         String FilePath = FileUtils.getFilePath(mContext, data.getData());
                         String settingsBackup = FileUtils.readFromSettingsFile(FilePath);
                         loadBackup(settingsBackup);
-                    }
-                    catch(IOException | URISyntaxException e) {
+                    } catch (IOException | URISyntaxException e) {
                         showToast(R.string.backup_load_error);
                         Log.e("Backup error : ", e.getMessage());
                     }
@@ -124,27 +126,31 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         try {
             //Get settings
-            Settings currentSettings = SettingsUtil.getSettings();
-            JSONObject coreSettings = currentSettings.toJSONObject();
-            backupObject.put(coreSettingsKey, coreSettings);
+            JSONObject coreSettings = Settings.toJSONObject(this);
+            backupObject.put(CORE_SETTINGS_KEY, coreSettings);
 
             //Get pokemon filters
             ArrayList<FilterItem> currentPokeFilters = PokemonListLoader.getFilteredList();
             JSONArray filtersArray = new JSONArray();
             for (FilterItem filterItem : currentPokeFilters)
                 filtersArray.put(filterItem.toJSONObject());
-            backupObject.put(pokemonFiltersKey, filtersArray);
+            backupObject.put(POKEMON_FILTERS_KEY, filtersArray);
+
+            ArrayList<NotificationItem> currentPokeNotifs = PokemonListLoader.getNotificationList();
+            JSONArray notificationsArray = new JSONArray();
+            for (NotificationItem notifItem : currentPokeNotifs)
+                notificationsArray.put(notifItem.toJSONObject());
+            backupObject.put(POKEMON_NOTIFICATION_KEY, notificationsArray);
 
             //Get current users
             RealmResults<User> currentUsers = realm.where(User.class).findAll();
             JSONArray usersArray = new JSONArray();
             for (User user : currentUsers)
                 usersArray.put(user.toJSONObject());
-            backupObject.put(accountsKey, usersArray);
+            backupObject.put(ACCOUNTS_KEY, usersArray);
 
             createFileNameDialog(backupObject.toString(4));
-        }
-        catch(RealmException | JSONException e) {
+        } catch (RealmException | JSONException e) {
             showToast(R.string.backup_creation_error);
             Log.e("Backup error ", e.getMessage());
         }
@@ -152,29 +158,56 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     private void loadBackup(String backupString) {
         try {
-            JSONObject backupObject = new JSONObject(backupString);
-            final String coreSettings = backupObject.getJSONObject(coreSettingsKey).toString();
-            final JSONArray users = backupObject.getJSONArray(accountsKey);
-            final JSONArray pokemonFilters = backupObject.getJSONArray(pokemonFiltersKey);
+            final JSONObject backupObject = new JSONObject(backupString);
+            Map<String, Object> coreSettings = JsonUtils.toMap(backupObject.getJSONObject(CORE_SETTINGS_KEY));
+            Settings.loadSharedPreferencesFromFile(this, coreSettings);
+            final JSONArray users = getJsonArray(backupObject, ACCOUNTS_KEY);
+            final JSONArray pokemonFilters = handleOldBackup(getJsonArray(backupObject, POKEMON_FILTERS_KEY));
+            final JSONArray pokemonNotifs = handleOldBackup(getJsonArray(backupObject, POKEMON_NOTIFICATION_KEY));
 
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    realm.where(User.class).findAll().deleteAllFromRealm();
-                    realm.where(Settings.class).findAll().deleteAllFromRealm();
-                    realm.where(FilterItem.class).findAll().deleteAllFromRealm();
+                    if (users != null) {
+                        realm.where(User.class).findAll().deleteAllFromRealm();
+                        realm.createOrUpdateAllFromJson(User.class, users);
+                    }
+                    if (pokemonFilters != null) {
+                        realm.where(FilterItem.class).findAll().deleteAllFromRealm();
+                        realm.createOrUpdateAllFromJson(FilterItem.class, pokemonFilters);
 
-                    realm.createOrUpdateObjectFromJson(Settings.class, coreSettings);
-                    realm.createOrUpdateAllFromJson(User.class, users);
-                    realm.createOrUpdateAllFromJson(FilterItem.class, pokemonFilters);
+                    }
+                    if (pokemonNotifs != null) {
+                        realm.where(NotificationItem.class).findAll().deleteAllFromRealm();
+                        realm.createOrUpdateAllFromJson(NotificationItem.class, pokemonNotifs);
+                    }
                 }
             });
             showToast(R.string.backup_load_success);
-        }
-        catch(RealmException | JSONException e) {
+        } catch (RealmException | JSONException e) {
             showToast(R.string.backup_load_error);
             Log.e("Backup error ", e.getMessage());
         }
+    }
+
+    private JSONArray handleOldBackup(JSONArray array) throws JSONException {
+        JSONArray newArray = new JSONArray();
+        JSONObject object;
+        for (int i = 0; i < array.length(); i++) {
+            object = array.getJSONObject(i);
+            object.put("Number", object.remove("number"));
+            object.put("Name", object.remove("name"));
+            newArray.put(object);
+        }
+        Log.d("POKE", newArray.toString());
+        return newArray;
+    }
+
+    private JSONArray getJsonArray(JSONObject jsonObject, String key) throws JSONException {
+        if (jsonObject.has(key)) {
+            return jsonObject.getJSONArray(key);
+        }
+        return null;
     }
 
     private void createFileNameDialog(final String backupString) {
@@ -188,7 +221,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         builder.setPositiveButton(getResources().getString(R.string.create_backup), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String fileName = fileNameBox.getText().toString().trim();
-                if(fileName.equals(""))
+                if (fileName.equals(""))
                     showToast(R.string.file_name_error);
                 else {
                     backupContents = backupString;
@@ -262,7 +295,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     showToast(R.string.PERMISSION_OK);
                     openFilePicker();
                 } else {
-                   showToast(R.string.backup_load_error);
+                    showToast(R.string.backup_load_error);
                 }
             }
             break;

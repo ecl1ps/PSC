@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.pokescanner.R;
 import com.pokescanner.objects.NotificationItem;
-import com.pokescanner.utils.SettingsUtil;
+import com.pokescanner.settings.Settings;
 
 /**
  * Created by Brian on 7/21/2016.
@@ -46,7 +46,7 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder {
         String uri;
         int pokemonnumber = notificationItem.getNumber();
 
-        if (SettingsUtil.getSettings().isShuffleIcons()) {
+        if (Settings.getPreferenceBoolean(context, Settings.SHUFFLE_ICONS)) {
             uri = "ps" + pokemonnumber;
         }
         else uri = "p" + pokemonnumber;

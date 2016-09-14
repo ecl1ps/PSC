@@ -30,7 +30,6 @@ import com.pokescanner.recycler.ListViewRecyclerAdapter;
 import com.pokescanner.settings.Settings;
 import com.pokescanner.settings.SettingsFragment;
 import com.pokescanner.utils.PermissionUtils;
-import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -183,10 +182,9 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
             if (!MultiAccountLoader.areThreadsRunning()) {
                 pos = 1;
                 progressBar.setProgress(0);
-                Settings currentSettings = SettingsUtil.getSettings();
                 //Get our scale for range
-                int scale = currentSettings.getScanValue();
-                int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
+                int scanValue = Settings.getPreferenceInt(this, Settings.SCAN_VALUE);
+                int SERVER_REFRESH_RATE = Settings.getPreferenceInt(this, Settings.SERVER_REFRESH_RATE);
                 //pull our GPS location
                 LatLng scanPosition = getCurrentLocation();
 
@@ -196,7 +194,7 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
                 }
 
                 if (scanPosition != null) {
-                    scanMap = makeHexScanMap(scanPosition, scale, 1, new ArrayList<LatLng>());
+                    scanMap = makeHexScanMap(scanPosition, scanValue, 1, new ArrayList<LatLng>());
                     if (scanMap != null) {
                         showProgressbar(true);
                         //Pull our users from the realm

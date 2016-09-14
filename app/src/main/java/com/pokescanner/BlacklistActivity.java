@@ -27,10 +27,14 @@ import io.realm.Realm;
  * Created by Brian on 7/22/2016.
  */
 public class BlacklistActivity extends AppCompatActivity implements TextWatcher {
-    @BindView(R.id.etSearch) EditText etSearch;
-    @BindView(R.id.filterRecycler) RecyclerView filterRecycler;
-    @BindView(R.id.btnNone) Button btnNone;
-    @BindView(R.id.btnAll) Button btnAll;
+    @BindView(R.id.etSearch)
+    EditText etSearch;
+    @BindView(R.id.filterRecycler)
+    RecyclerView filterRecycler;
+    @BindView(R.id.btnNone)
+    Button btnNone;
+    @BindView(R.id.btnAll)
+    Button btnAll;
 
     ArrayList<FilterItem> filterItems = new ArrayList<>();
     RecyclerView.Adapter mAdapter;
@@ -55,7 +59,7 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
         setupRecycler();
     }
 
-    public void setupRecycler(){
+    public void setupRecycler() {
         RecyclerView.LayoutManager mLayoutManager;
         filterRecycler.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
@@ -83,7 +87,7 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
         finishActivity();
     }
 
-    public void finishActivity(){
+    public void finishActivity() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -95,14 +99,15 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
 
 
     @OnClick(R.id.btnNone)
-    public void selectNoneButton(){
+    public void selectNoneButton() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 filterItems.clear();
                 filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class)
-                        .findAll()));
-                for (FilterItem filterItem: filterItems) {
+                        .findAll()
+                        .sort("Number")));
+                for (FilterItem filterItem : filterItems) {
                     filterItem.setFiltered(false);
                 }
                 mAdapter.notifyDataSetChanged();
@@ -111,14 +116,15 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
     }
 
     @OnClick(R.id.btnAll)
-    public void selectAllButton(){
+    public void selectAllButton() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 filterItems.clear();
                 filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class)
-                        .findAll()));
-                for (FilterItem filterItem: filterItems) {
+                        .findAll()
+                        .sort("Number")));
+                for (FilterItem filterItem : filterItems) {
                     filterItem.setFiltered(true);
                 }
                 mAdapter.notifyDataSetChanged();
@@ -138,12 +144,12 @@ public class BlacklistActivity extends AppCompatActivity implements TextWatcher 
                 public void execute(Realm realm) {
                     filterItems.clear();
                     filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class)
-                            .contains("Name",charSequence.toString(), Case.INSENSITIVE)
+                            .contains("Name", charSequence.toString(), Case.INSENSITIVE)
                             .findAll()));
                     mAdapter.notifyDataSetChanged();
                 }
             });
-        }else {
+        } else {
             filterItems.clear();
             filterItems.addAll(realm.copyFromRealm(realm.where(FilterItem.class).findAll()));
             mAdapter.notifyDataSetChanged();

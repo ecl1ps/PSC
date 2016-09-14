@@ -37,7 +37,6 @@ import com.pokescanner.objects.User;
 import com.pokescanner.settings.Settings;
 import com.pokescanner.settings.SettingsFragment;
 import com.pokescanner.utils.PermissionUtils;
-import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -122,16 +121,15 @@ public class DrivingModeActivity extends AppCompatActivity implements GoogleApiC
                 pos = 1;
                 progressBar.setProgress(0);
                 //Get our scale for range
-                Settings currentSettings = SettingsUtil.getSettings();
-                int scale = currentSettings.getScanValue();
-                int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
+                int scanValue = Settings.getPreferenceInt(this, Settings.SCAN_VALUE);
+                int SERVER_REFRESH_RATE = Settings.getPreferenceInt(this, Settings.SERVER_REFRESH_RATE);
                 //pull our GPS location
                 LatLng scanPosition = getCurrentLocation();
 
                 Toast.makeText(DrivingModeActivity.this, "Starting new Scan", Toast.LENGTH_SHORT).show();
 
                 if (scanPosition != null) {
-                    scanMap = makeHexScanMap(scanPosition, scale, 1, new ArrayList<LatLng>());
+                    scanMap = makeHexScanMap(scanPosition, scanValue, 1, new ArrayList<LatLng>());
                     if (scanMap != null) {
                         showProgressbar(true);
                         //Pull our users from the realm

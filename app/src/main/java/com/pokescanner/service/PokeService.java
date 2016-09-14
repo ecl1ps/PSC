@@ -1,18 +1,12 @@
 package com.pokescanner.service;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.util.TimeUtils;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -20,7 +14,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.pokescanner.MapsActivity;
 import com.pokescanner.R;
 import com.pokescanner.helper.PokeDistanceSorter;
 import com.pokescanner.helper.PokemonListLoader;
@@ -30,15 +23,11 @@ import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
 import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.PermissionUtils;
-import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import io.fabric.sdk.android.Fabric;
@@ -68,17 +57,17 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
 
     private void scanForPoke() {
         Fabric.with(this, new Crashlytics());
-        Settings currentSettings = SettingsUtil.getSettings();
-        int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
-        int scanValue = currentSettings.getScanValue();
-        PokeNotifications.ongiongNotification(getString(R.string.scan_running) + " " + UiUtils.getSearchTimeString(SettingsUtil.getSettings().getScanValue(), this), this);
+
+        int SERVER_REFRESH_RATE = Settings.getPreferenceInt(this, Settings.SERVER_REFRESH_RATE);
+        int scanValue = Settings.getPreferenceInt(this, Settings.SCAN_VALUE);
+        PokeNotifications.ongiongNotification(getString(R.string.scan_running) + " " + UiUtils.getSearchTimeString(scanValue, this), this);
 
         realm = Realm.getDefaultInstance();
 
         //get our saved or current position
-        if (currentSettings.isCustomLocationEnabled()) {
-            if (currentSettings.getCustomLocation() != null) {
-                location = currentSettings.getCustomLocation();
+        if (Settings.getPreferenceBoolean(this, Settings.ENABLE_CUSTOM_LOCATION)) {
+            if (Settings.getCustomLocation(this) != null) {
+                location = Settings.getCustomLocation(this);
             } else {
                 PokeNotifications.ongiongNotification(getString(R.string.custom_location_invalid), this);
                 location = getCurrentLocation();
@@ -166,7 +155,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
     static private ArrayList<Pokemons> pokemonRecycler = new ArrayList<>();
 
     public static void pokeNotification(Context context) {
-        String content = String.format(context.getString(R.string.scan_complete), TimeUnit.MILLISECONDS.toMinutes(SettingsUtil.getSettings().getServiceRefresh()));
+        String content = String.format(context.getString(R.string.scan_complete), TimeUnit.MILLISECONDS.toMinutes(Integer.parseInt(Settings.getPreferenceString(context, Settings.SERVICE_REFRESH))));
         PokeNotifications.ongiongNotification(content, context);
 
         realm = Realm.getDefaultInstance();
@@ -218,16 +207,15 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
 
         if (pokemonRecycler.size() > 0) {
             Collections.sort(pokemonRecycler, new PokeDistanceSorter());
-            removeAlreadyNotified(pokemonRecycler);
+            removeAlreadyNotified(context, pokemonRecycler);
             PokeNotifications.pokeNotification(context, pokemonRecycler);
         }
 
         Log.d("POKE", "Found " + pokemonRecycler.size() + " pokemon");
     }
 
-    private static void removeAlreadyNotified(ArrayList<Pokemons> pokemonRecycler) {
-        Settings settings = SettingsUtil.getSettings();
-        ArrayList<Long> notifiedEncounters = settings.getNotifiedEncounters();
+    private static void removeAlreadyNotified(Context context, ArrayList<Pokemons> pokemonRecycler) {
+        ArrayList<Long> notifiedEncounters = Settings.getNotifiedEncounters(context);
         ArrayList<Pokemons> templist = new ArrayList<>();
         for (Pokemons pokemon : pokemonRecycler) {
             if (notifiedEncounters.contains(pokemon.getEncounterid())) {
@@ -237,8 +225,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
             }
         }
         pokemonRecycler.removeAll(templist);
-        settings.setNotifiedEncounters(notifiedEncounters);
-        SettingsUtil.saveSettings(settings);
+        Settings.setNotifiedEncounters(context, notifiedEncounters);
     }
 
     protected static String getBearing(LatLng user, Location pokemon) {

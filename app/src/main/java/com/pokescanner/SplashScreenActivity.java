@@ -5,12 +5,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
@@ -30,7 +32,6 @@ import com.pokescanner.updater.AppUpdate;
 import com.pokescanner.updater.AppUpdateDialog;
 import com.pokescanner.updater.AppUpdateLoader;
 import com.pokescanner.utils.PermissionUtils;
-import com.pokescanner.utils.SettingsUtil;
 import com.zl.reik.dilatingdotsprogressbar.DilatingDotsProgressBar;
 
 import org.greenrobot.eventbus.EventBus;
@@ -72,7 +73,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         checkingForUpdate = false;
         builder = new AlertDialog.Builder(mContext);
         dialog = builder.create();
-
+        checkRequirementsAndInitialize();
         //Realm initialization
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
                 .name(Realm.DEFAULT_REALM_NAME)
@@ -89,7 +90,6 @@ public class SplashScreenActivity extends AppCompatActivity {
         //Start the progress indicator
         splashProgress.show();
         loadVersionNumber();
-        checkRequirementsAndInitialize();
     }
 
     private void loadVersionNumber() {
@@ -102,36 +102,29 @@ public class SplashScreenActivity extends AppCompatActivity {
         }
     }
 
-    private void checkRequirementsAndInitialize()  {
+    private void checkRequirementsAndInitialize() {
         if (isConnectedToTheInternet()) {
             if (checkGooglePlayServicesAvailable()) {
                 if (getLocationPermission()) {
-                    Settings currentSettings = SettingsUtil.getSettings();
                     if (BuildConfig.enableUpdater) {
-                        if (currentSettings.isUpdatesEnabled()) {
+                        if (Settings.getPreferenceBoolean(this, Settings.ENABLE_UPDATES)) {
                             new AppUpdateLoader().start();
                             checkingForUpdate = true;
-                        }
-                        else
-                        {
+                        } else {
                             goToLoginScreen();
                         }
-                    }
-                    else
-                    {
+                    } else {
                         goToLoginScreen();
                     }
                 }
             }
-        }
-        else
-        {
+        } else {
             displayErrorDialog(getString(R.string.no_internet));
         }
     }
 
     private void displayErrorDialog(String message) {
-        if(!dialog.isShowing()) {
+        if (!dialog.isShowing()) {
             builder = new AlertDialog.Builder(mContext);
             builder.setMessage(message);
             builder.setCancelable(false);
@@ -188,7 +181,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     }
 
     private void showAppUpdateDialog(final Context context, final AppUpdate update) {
-        if(!dialog.isShowing()) {
+        if (!dialog.isShowing()) {
             builder = new AlertDialog.Builder(context)
                     .setTitle(R.string.update_available_title)
                     .setMessage(context.getString(R.string.app_name) + " " + update.getVersion() + " " + context.getString(R.string.update_available_long) + "\n\n" + context.getString(R.string.changes) + "\n\n" + update.getChangelog())
@@ -221,7 +214,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                     showAppUpdateDialog(mContext, event.getAppUpdate());
                     checkingForUpdate = false;
                     System.out.println("Updating");
-                } else{
+                } else {
                     getReadWritePermission();
                 }
                 break;
@@ -238,7 +231,7 @@ public class SplashScreenActivity extends AppCompatActivity {
     }
 
     public void goToLoginScreen() {
-        if(!dialog.isShowing()) {
+        if (!dialog.isShowing()) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -320,7 +313,6 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
-
 
 
 }

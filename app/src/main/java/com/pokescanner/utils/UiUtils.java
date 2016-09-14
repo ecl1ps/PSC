@@ -10,6 +10,7 @@ import com.pokescanner.objects.FilterItem;
 import com.pokescanner.objects.NotificationItem;
 import com.pokescanner.objects.Pokemons;
 import com.pokescanner.objects.User;
+import com.pokescanner.settings.Settings;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
@@ -31,7 +32,10 @@ public class UiUtils {
     }
 
     public static String getSearchTimeString(int val, Context context) {
-        int serverRefreshValue = (BASE_DELAY * SettingsUtil.getSettings().getServerRefresh());
+        if (Realm.getDefaultInstance().where(User.class).findAll().size() <= 0){
+            return "99:99";
+        }
+        int serverRefreshValue = (BASE_DELAY * Settings.getPreferenceInt(context, Settings.SERVER_REFRESH_RATE));
         int serverDividedValue = serverRefreshValue / Realm.getDefaultInstance().where(User.class).findAll().size();
         int calculatedValue = hexagonal_number(val) * serverDividedValue;
         System.out.println(serverRefreshValue + " " + serverDividedValue + " " + calculatedValue);
@@ -42,7 +46,7 @@ public class UiUtils {
     }
 
     public static long getSearchTimeLong(int val, Context context) {
-        int serverRefreshValue = (BASE_DELAY * SettingsUtil.getSettings().getServerRefresh());
+        int serverRefreshValue = (BASE_DELAY * Settings.getPreferenceInt(context, Settings.SERVER_REFRESH_RATE));
         int serverDividedValue = serverRefreshValue / Realm.getDefaultInstance().where(User.class).findAll().size();
         int calculatedValue = hexagonal_number(val) * serverDividedValue;
         System.out.println(serverRefreshValue + " " + serverDividedValue + " " + calculatedValue);

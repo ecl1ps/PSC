@@ -9,7 +9,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.pokegoapi.api.map.fort.Pokestop;
 import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.DrawableUtils;
-import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
 
 import org.joda.time.DateTime;
@@ -74,7 +73,7 @@ public class PokeStop extends RealmObject
         MarkerOptions pokestopMarker = new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromBitmap(getBitmap(context)))
                 .position(position);
-        if (SettingsUtil.getSettings().isUseOldMapMarker())
+        if (Settings.getPreferenceBoolean(context, Settings.KEY_OLD_MARKER))
         {
             pokestopMarker.title("Pokestop");
             pokestopMarker.snippet(snippetMessage);
@@ -105,9 +104,8 @@ public class PokeStop extends RealmObject
             uri = "stop_lure";
             pokeStopType = DrawableUtils.LuredPokeStopType;
             //if ShowLuredPokemon is enabled, show the icon of the lured pokemon
-            Settings currentSettings = SettingsUtil.getSettings();
-            if (currentSettings.isShowLuredPokemon()) {
-                if (currentSettings.isShuffleIcons()) {
+            if (Settings.getPreferenceBoolean(context, Settings.SHOW_LURED_POKEMON)) {
+                if (Settings.getPreferenceBoolean(context, Settings.SHUFFLE_ICONS)) {
                     uri = "ps" + pokemonnumber;
                 }
                 else

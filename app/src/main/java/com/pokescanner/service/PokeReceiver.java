@@ -7,11 +7,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 
 import com.pokescanner.loaders.MultiAccountLoader;
 import com.pokescanner.settings.Settings;
-import com.pokescanner.utils.SettingsUtil;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -26,11 +24,7 @@ public class PokeReceiver extends BroadcastReceiver {
     public static void cancelAlarm(Context context) {
         NotificationManager mNotifyMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(PokeNotifications.ONGOING_ID);
-        Settings settings = SettingsUtil.getSettings();
-        settings.setServiceEnabled(false);
-        SettingsUtil.saveSettings(settings);
-        PreferenceManager.getDefaultSharedPreferences(context)
-                .edit().putBoolean(SettingsUtil.ENABLE_SERVICE, false).apply();
+        Settings.setPreference(context, Settings.ENABLE_SERVICE, false);
         MultiAccountLoader.cancelAllThreads();
         Intent intent = new Intent(context, PokeReceiver.class);
         final PendingIntent pIntent = PendingIntent.getBroadcast(context, PokeReceiver.REQUEST_CODE,
@@ -51,9 +45,11 @@ public class PokeReceiver extends BroadcastReceiver {
             if (intent.getAction().equals(PokeNotifications.STOP_SERVICE)) {
                 cancelAlarm(context);
             } else if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
-                scheduleAlarm(context);
+                if (Settings.getPreferenceBoolean(context, Settings.ENABLE_SERVICE_ON_BOOT)) {
+                    scheduleAlarm(context);
+                }
             } else if (intent.getAction().equals("android.intent.action.MY_PACKAGE_REPLACED")) {
-                if (SettingsUtil.getSettings().isServiceEnabled()) {
+                if (Settings.getPreferenceBoolean(context, Settings.ENABLE_SERVICE)) {
                     scheduleAlarm(context);
                 }
             } else if (intent.getAction().equals(PokeNotifications.RESCAN)) {
@@ -75,7 +71,7 @@ public class PokeReceiver extends BroadcastReceiver {
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarm.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(),
-                SettingsUtil.getSettings().getServiceRefresh(), pIntent);
+                Integer.parseInt(Settings.getPreferenceString(context, Settings.SERVICE_REFRESH)), pIntent);
 
     }
 }

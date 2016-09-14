@@ -9,8 +9,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pokescanner.R;
+import com.pokescanner.settings.Settings;
 import com.pokescanner.utils.DrawableUtils;
-import com.pokescanner.utils.SettingsUtil;
 
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
@@ -77,7 +77,7 @@ public class Pokemons  extends RealmObject{
                 .draggable(true)
                 .anchor(0.5f, 0.5f) // Center image to position
                 .position(position);
-        if (SettingsUtil.getSettings().isUseOldMapMarker())
+        if (Settings.getPreferenceBoolean(context, Settings.KEY_OLD_MARKER))
         {
             pokeIcon.title(getName());
             pokeIcon.snippet(context.getText(R.string.expires_in) + timeOut);
@@ -89,7 +89,7 @@ public class Pokemons  extends RealmObject{
     public String getFormalName(Context context) {
         String name = getName();
 
-        if (!SettingsUtil.getSettings().isForceEnglishNames()) {
+        if (!Settings.getPreferenceBoolean(context, Settings.FORCE_ENGLISH_NAMES)) {
             name = context.getString(DrawableUtils.getStringID(getNumber(), context));
         }
 

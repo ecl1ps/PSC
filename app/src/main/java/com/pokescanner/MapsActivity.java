@@ -73,7 +73,6 @@ import com.pokescanner.settings.SettingsFragment;
 import com.pokescanner.utils.DrawableUtils;
 import com.pokescanner.utils.MarkerDetails;
 import com.pokescanner.utils.PermissionUtils;
-import com.pokescanner.utils.SettingsUtil;
 import com.pokescanner.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -223,15 +222,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (SCANNING_STATUS) {
             stopPokeScan();
         } else {
-            Settings currentSettings = SettingsUtil.getSettings();
             //Progress Bar Related Stuff
             pos = 1;
-            int SERVER_REFRESH_RATE = currentSettings.getServerRefresh();
+            int SERVER_REFRESH_RATE = Settings.getPreferenceInt(this, Settings.SERVER_REFRESH_RATE);
 
             System.out.println(SERVER_REFRESH_RATE);
 
             progressBar.setProgress(0);
-            int scanValue = currentSettings.getScanValue();
+            int scanValue = Settings.getPreferenceInt(this, Settings.SCAN_VALUE);
             showProgressbar(true);
             //get our camera position
             LatLng scanPosition = null;
@@ -244,7 +242,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 e.printStackTrace();
             }
 
-            if (SettingsUtil.getSettings().isDrivingModeEnabled() && moveCameraToCurrentPosition(false)) {
+            if (Settings.getPreferenceBoolean(this, Settings.DRIVING_MODE) && moveCameraToCurrentPosition(false)) {
                 scanPosition = getCurrentLocation();
             }
 
@@ -461,8 +459,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     removeBoundingBox();
                     LatLng target = getCameraLocation();
                     if (target != null) {
-                        Settings currentSettings = SettingsUtil.getSettings();
-                        int scanValue = currentSettings.getScanValue();
+                        int scanValue = Settings.getPreferenceInt(this, Settings.SCAN_VALUE);
                         List<LatLng> tempScanMap = makeHexScanMap(target, scanValue, 1, new ArrayList<LatLng>());
                         List<LatLng> tempCornerMap = getCorners(tempScanMap);
 
@@ -503,28 +500,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //Returns true if gym is to be shown
     public boolean shouldGymBeFiltered(Gym gym) {
-        Settings currentSettings = SettingsUtil.getSettings();
         int guardPokemonCp = gym.getGuardPokemonCp();
-        int minCp = currentSettings.getGuardPokemonMinCp();
-        int maxCp = currentSettings.getGuardPokemonMaxCp();
+        int minCp = Settings.getPreferenceInt(this, Settings.GUARD_MIN_CP);
+        int maxCp = Settings.getPreferenceInt(this, Settings.GUARD_MAX_CP);
         if (!((guardPokemonCp >= minCp) && (guardPokemonCp <= maxCp)) && (guardPokemonCp != 0))
             return false;
         int ownedByTeamValue = gym.getOwnedByTeamValue();
         switch (ownedByTeamValue) {
             case 0:
-                if (!currentSettings.isNeutralGymsEnabled())
+                if (!Settings.getPreferenceBoolean(this, Settings.SHOW_NEUTRAL_GYMS))
                     return false;
                 break;
             case 1:
-                if (!currentSettings.isBlueGymsEnabled())
+                if (!Settings.getPreferenceBoolean(this, Settings.SHOW_BLUE_GYMS))
                     return false;
                 break;
             case 2:
-                if (!currentSettings.isRedGymsEnabled())
+                if (!Settings.getPreferenceBoolean(this, Settings.SHOW_RED_GYMS))
                     return false;
                 break;
             case 3:
-                if (!currentSettings.isYellowGymsEnabled())
+                if (!Settings.getPreferenceBoolean(this, Settings.SHOW_YELLOW_GYMS))
                     return false;
                 break;
         }
@@ -532,10 +528,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public boolean shouldPokestopBeFiltered(PokeStop pokeStop){
-        Settings currentSettings = SettingsUtil.getSettings();
-        if(pokeStop.isHasLureInfo() && !currentSettings.isLuredPokestopsEnabled())
+        if(pokeStop.isHasLureInfo() && !Settings.getPreferenceBoolean(this, Settings.SHOW_LURED_POKESTOPS))
             return false;
-        if(!pokeStop.isHasLureInfo() && !currentSettings.isNormalPokestopsEnabled())
+        if(!pokeStop.isHasLureInfo() && !Settings.getPreferenceBoolean(this, Settings.SHOW_NORMAL_POKESTOPS))
             return false;
         return true;
     }
@@ -543,7 +538,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     public void createMapObjects() {
-        if (SettingsUtil.getSettings().isBoundingBoxEnabled()) {
+        if (Settings.getPreferenceBoolean(this, Settings.KEY_BOUNDING_BOX)) {
             createBoundingBox();
         } else {
             removeBoundingBox();
@@ -557,7 +552,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             gymstopRefresher.unsubscribe();
 
         //Using RX java we setup an interval to refresh the map
-        pokeonRefresher = Observable.interval(SettingsUtil.getSettings().getMapRefresh(), TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+        pokeonRefresher = Observable.interval(Settings.getPreferenceInt(this, Settings.MAP_REFRESH_RATE), TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {
@@ -608,7 +603,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRestartRefreshEvent(RestartRefreshEvent event) {
-        System.out.println(SettingsUtil.getSettings().getServerRefresh());
         refreshGymsAndPokestops();
         refreshMap();
         startRefresher();
@@ -865,7 +859,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }
                 if (markerKey != null) {
-                    if (!SettingsUtil.getSettings().isUseOldMapMarker()) {
+                    if (!Settings.getPreferenceBoolean(MapsActivity.this, Settings.KEY_OLD_MARKER)) {
                         removeAdapterAndListener();
                         MarkerDetails.showMarkerDetailsDialog(MapsActivity.this, markerKey);
                     } else {
@@ -887,7 +881,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng GPS_LOCATION = getCurrentLocation();
         if (GPS_LOCATION != null) {
             if (mMap != null) {
-                if (zoom || SettingsUtil.getSettings().isDrivingModeEnabled()) {
+                if (zoom || Settings.getPreferenceBoolean(MapsActivity.this, Settings.DRIVING_MODE)) {
                     this.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(GPS_LOCATION,15));
                 } else {
                     this.mMap.animateCamera(CameraUpdateFactory.newLatLng(GPS_LOCATION));
