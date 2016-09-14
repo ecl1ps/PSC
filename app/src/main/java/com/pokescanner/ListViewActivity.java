@@ -206,7 +206,7 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
                         //Set our users
                         MultiAccountLoader.setUsers(users);
                         //Begin our threads???
-                        MultiAccountLoader.startThreads();
+                        MultiAccountLoader.startThreads(this);
                     }
                 }
             }

@@ -141,7 +141,7 @@ public class DrivingModeActivity extends AppCompatActivity implements GoogleApiC
                         //Set our users
                         MultiAccountLoader.setUsers(users);
                         //Begin our threads???
-                        MultiAccountLoader.startThreads();
+                        MultiAccountLoader.startThreads(this);
                     }
                 }
             }

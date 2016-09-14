@@ -260,7 +260,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     MultiAccountLoader.setUsers(users);
                     MultiAccountLoader.setIsBackground(false);
                     //Begin our threads???
-                    MultiAccountLoader.startThreads();
+                    MultiAccountLoader.startThreads(this);
                 } else {
                     showToast(R.string.SCAN_FAILED);
                     showProgressbar(false);

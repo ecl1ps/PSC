@@ -28,11 +28,10 @@ public class MultiAccountLoader {
     static private ArrayList<User> users;
     static private int SLEEP_TIME;
     static private ArrayList<ObjectLoaderPTC> tasks;
-    static private Context sContext;
-    static private boolean isBackground;
+    static private boolean isBackground = false;
 
 
-    static public void startThreads() {
+    static public void startThreads(Context context) {
         scanMaps = new ArrayList<>();
         tasks = new ArrayList<>();
 
@@ -50,7 +49,7 @@ public class MultiAccountLoader {
         for (int i = 0; i < scanMaps.size(); i++) {
             List<LatLng> tempMap = scanMaps.get(i);
             User tempUser = users.get(i);
-            ObjectLoaderPTC objectLoaderPTC = new ObjectLoaderPTC(sContext, tempUser, tempMap, SLEEP_TIME, i);
+            ObjectLoaderPTC objectLoaderPTC = new ObjectLoaderPTC(context, tempUser, tempMap, SLEEP_TIME, i);
             objectLoaderPTC.executeOnExecutor(THREAD_POOL_EXECUTOR);
             tasks.add(objectLoaderPTC);
         }
@@ -67,10 +66,6 @@ public class MultiAccountLoader {
 
     static public void setScanMap(List<LatLng> scanMap) {
         MultiAccountLoader.scanMap = scanMap;
-    }
-
-    static public void setContext(Context context) {
-        MultiAccountLoader.sContext = context;
     }
 
     public static void setIsBackground(boolean isBackground) {

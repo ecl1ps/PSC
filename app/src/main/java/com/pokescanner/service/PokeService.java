@@ -88,10 +88,9 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
                 MultiAccountLoader.setScanMap(scanMap);
                 //Set our users
                 MultiAccountLoader.setUsers(users);
-                MultiAccountLoader.setContext(this);
                 MultiAccountLoader.setIsBackground(true);
                 //Begin our threads???
-                MultiAccountLoader.startThreads();
+                MultiAccountLoader.startThreads(this);
             } else {
                 PokeNotifications.ongiongNotification("Scan failed", this);
             }
@@ -155,6 +154,11 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
     static private ArrayList<Pokemons> pokemonRecycler = new ArrayList<>();
 
     public static void pokeNotification(Context context) {
+        //Not sure if this will actually work
+        if (context == null){
+            context = new PokeService();
+        }
+
         String content = String.format(context.getString(R.string.scan_complete), TimeUnit.MILLISECONDS.toMinutes(Integer.parseInt(Settings.getPreferenceString(context, Settings.SERVICE_REFRESH))));
         PokeNotifications.ongiongNotification(content, context);
 
