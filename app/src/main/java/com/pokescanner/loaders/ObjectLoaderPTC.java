@@ -58,7 +58,6 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        Log.d("POKE", "Starting thread " + position);
         try {
             OkHttpClient client = new OkHttpClient();
             //Create our provider and set it to null
@@ -129,7 +128,6 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         MultiAccountLoader.checkIfComplete(context);
-        Log.d("POKE", "Thread " + position + " complete");
     }
 }
 

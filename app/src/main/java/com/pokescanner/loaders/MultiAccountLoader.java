@@ -73,7 +73,6 @@ public class MultiAccountLoader {
     }
 
     static public void checkIfComplete(Context context) {
-        Log.d("POKE", "Check complete");
         int counter = 1;
         for (ObjectLoaderPTC objectLoaderPTC : tasks) {
             if (objectLoaderPTC.getStatus() == AsyncTask.Status.FINISHED) {
@@ -81,7 +80,6 @@ public class MultiAccountLoader {
             }
         }
         if (counter == scanMaps.size()) {
-            Log.d("POKE", "All threads complete!");
             if (isBackground) {
                 PokeService.pokeNotification(context);
             }
