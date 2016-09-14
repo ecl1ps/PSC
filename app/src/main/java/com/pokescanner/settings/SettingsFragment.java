@@ -475,7 +475,7 @@ public class SettingsFragment extends PreferenceFragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == CUSTOM_LOCATION_REQUEST) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK && data != null) {
                 Place place = PlacePicker.getPlace(mContext, data);
                 Settings.setCustomLocation(mContext, place.getLatLng());
                 custom_location.setSummary(place.getLatLng().toString());
