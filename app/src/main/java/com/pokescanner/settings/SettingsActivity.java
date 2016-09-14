@@ -198,8 +198,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         JSONObject object;
         for (int i = 0; i < array.length(); i++) {
             object = array.getJSONObject(i);
-            object.put("Number", object.remove("number"));
-            object.put("Name", object.remove("name"));
+            if (object.has("number")) {
+                object.put("Number", object.remove("number"));
+            }
+            if (object.has("name")) {
+                object.put("Name", object.remove("name"));
+            }
             newArray.put(object);
         }
         return newArray;
