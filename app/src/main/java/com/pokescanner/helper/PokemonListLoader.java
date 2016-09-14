@@ -25,7 +25,11 @@ public class PokemonListLoader {
 
     public static ArrayList getPokelist(Context context, int type) throws IOException {
         Realm realm = Realm.getDefaultInstance();
-        populatePokemonList(context);
+        if (type == FILTER) {
+            populateFilterPokemonList(context);
+        } else {
+            populateNotificationPokemonList(context);
+        }
         ArrayList<?> returnlist = new ArrayList<>(realm.copyFromRealm(
                 realm.where(type == FILTER ? FilterItem.class : NotificationItem.class)
                         .findAll()
@@ -69,42 +73,88 @@ public class PokemonListLoader {
 
     public static void populatePokemonList(Context context) throws IOException {
         Realm realm = Realm.getDefaultInstance();
-        InputStream is = context.getAssets().open("pokemons.json");
-        int size = is.available();
-        byte[] buffer = new byte[size];
-        is.read(buffer);
-        is.close();
-        String bufferString = new String(buffer);
-        Gson gson = new Gson();
-
-        Type listType = new TypeToken<ArrayList<FilterItem>>() {
-        }.getType();
-        final ArrayList<FilterItem> filterItems = gson.fromJson(bufferString, listType);
-        translateNamesIfNeeded(context, filterItems);
-        if (realm.where(FilterItem.class).findAll().size() > 0 && realm.where(FilterItem.class).findAll().size() < 151) {
-            filterItems.removeAll(getFilteredList());
-        }
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.copyToRealmOrUpdate(filterItems);
-            }
-        });
-
-        listType = new TypeToken<ArrayList<NotificationItem>>() {
-        }.getType();
-        final ArrayList<NotificationItem> notificationItem = gson.fromJson(bufferString, listType);
+        if (realm.where(FilterItem.class).findAll().size() != 151 || realm.where(NotificationItem.class).findAll().size() != 151) {
+            InputStream is = context.getAssets().open("pokemons.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String bufferString = new String(buffer);
+            Gson gson = new Gson();
+            Type listType = new TypeToken<ArrayList<FilterItem>>() {
+            }.getType();
+            final ArrayList<FilterItem> filterItems = gson.fromJson(bufferString, listType);
+            translateNamesIfNeeded(context, filterItems);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.copyToRealmOrUpdate(filterItems);
+                }
+            });
+            listType = new TypeToken<ArrayList<NotificationItem>>() {
+            }.getType();
+            final ArrayList<NotificationItem> notificationItem = gson.fromJson(bufferString, listType);
 //            translateNamesIfNeeded(context, notificationItem);
-        if (realm.where(NotificationItem.class).findAll().size() > 0 && realm.where(NotificationItem.class).findAll().size() < 151) {
-            notificationItem.removeAll(getNotificationList());
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.copyToRealmOrUpdate(notificationItem);
+                }
+            });
         }
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.copyToRealmOrUpdate(notificationItem);
-            }
-        });
+        realm.close();
+    }
 
+    public static void populateFilterPokemonList(Context context) throws IOException {
+        Realm realm = Realm.getDefaultInstance();
+        if (realm.where(FilterItem.class).findAll().size() != 151) {
+            InputStream is = context.getAssets().open("pokemons.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String bufferString = new String(buffer);
+            Gson gson = new Gson();
+            Type listType = new TypeToken<ArrayList<FilterItem>>() {
+            }.getType();
+            final ArrayList<FilterItem> filterItems = gson.fromJson(bufferString, listType);
+            translateNamesIfNeeded(context, filterItems);
+            if (realm.where(FilterItem.class).findAll().size() < 151 && realm.where(FilterItem.class).findAll().size() > 0) {
+                filterItems.removeAll(getFilteredList());
+            }
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.copyToRealmOrUpdate(filterItems);
+                }
+            });
+        }
+        realm.close();
+    }
+
+    public static void populateNotificationPokemonList(Context context) throws IOException {
+        Realm realm = Realm.getDefaultInstance();
+        if (realm.where(NotificationItem.class).findAll().size() != 151) {
+            InputStream is = context.getAssets().open("pokemons.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String bufferString = new String(buffer);
+            Gson gson = new Gson();
+            Type listType = new TypeToken<ArrayList<NotificationItem>>() {
+            }.getType();
+            final ArrayList<NotificationItem> notificationItem = gson.fromJson(bufferString, listType);
+            if (realm.where(NotificationItem.class).findAll().size() < 151 && realm.where(NotificationItem.class).findAll().size() > 0) {
+                notificationItem.removeAll(getNotificationList());
+            }
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.copyToRealmOrUpdate(notificationItem);
+                }
+            });
+        }
         realm.close();
     }
 
