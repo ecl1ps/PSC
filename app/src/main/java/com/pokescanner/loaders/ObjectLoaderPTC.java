@@ -64,6 +64,9 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
             //Create our provider and set it to null
             CredentialProvider provider = null;
             //Is our user google or PTC?
+            int scanPos = 0;
+
+            PokemonGo go = new PokemonGo(client);
             if (user.getAuthType() == User.GOOGLE) {
                 if (user.getToken() != null) {
                     provider = new GoogleUserCredentialProvider(client, user.getToken().getRefreshToken());
@@ -71,15 +74,15 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
                     EventBus.getDefault().post(new ForceLogoutEvent());
                 }
             } else {
-                provider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
+                try {
+                    provider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
+                }catch (RemoteServerException e){
+                    Thread.sleep(1000);
+                    provider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
+                }
             }
-
             if (provider != null) {
-                int scanPos = 0;
-
-                PokemonGo go = new PokemonGo(provider, client);
-
-                Thread.sleep(500);
+                go.login(provider);
                 for (LatLng pos : scanMap) {
                     go.setLatitude(pos.latitude);
                     go.setLongitude(pos.longitude);
@@ -108,10 +111,8 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
                         }
                     });
                     realm.close();
-
                     Thread.sleep(SLEEP_TIME);
                 }
-
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
