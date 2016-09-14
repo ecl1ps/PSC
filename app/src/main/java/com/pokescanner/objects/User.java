@@ -6,7 +6,6 @@ import android.graphics.Color;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Objects;
 import java.util.Random;
 
 import io.realm.RealmObject;
@@ -23,7 +22,7 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @ToString
-@EqualsAndHashCode(callSuper = false,exclude = {"token","status","authType"})
+@EqualsAndHashCode(callSuper = false, exclude = {"token", "status", "authType"})
 public class User extends RealmObject {
     static public final int PTC = 0;
     static public final int GOOGLE = 1;
@@ -37,7 +36,7 @@ public class User extends RealmObject {
     GoogleAuthToken token;
     int authType;
     int status = 10;
-    int accountColor;
+    int accountColor = 0;
 
     public User() {
     }
@@ -48,9 +47,6 @@ public class User extends RealmObject {
         this.token = token;
         this.authType = authType;
         this.status = status;
-        Random rnd = new Random();
-        int color = Color.argb(128, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
-        this.accountColor = color;
     }
 
     public JSONObject toJSONObject() throws JSONException {
@@ -63,5 +59,13 @@ public class User extends RealmObject {
         result.put("authType", authType);
         result.put("status", status);
         return result;
+    }
+
+    public int getAccountColor(){
+        if (accountColor == 0){
+            Random rnd = new Random();
+            this.accountColor = Color.argb(128, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        }
+        return this.accountColor;
     }
 }
