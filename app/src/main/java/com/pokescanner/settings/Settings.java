@@ -122,7 +122,6 @@ public class Settings {
         for (Map.Entry<String, ?> entry : input.entrySet()) {
             Object v = entry.getValue();
             String key = entry.getKey();
-            Log.d("POKE", "Key: " + key);
             if (stringPrefs.contains(key)) {
                 if (v instanceof Integer) {
                     prefEdit.putString(key, String.valueOf((Integer) v));

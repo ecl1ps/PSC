@@ -191,6 +191,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     }
 
     private JSONArray handleOldBackup(JSONArray array) throws JSONException {
+        if (array == null) {
+            return null;
+        }
         JSONArray newArray = new JSONArray();
         JSONObject object;
         for (int i = 0; i < array.length(); i++) {
@@ -199,7 +202,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             object.put("Name", object.remove("name"));
             newArray.put(object);
         }
-        Log.d("POKE", newArray.toString());
         return newArray;
     }
 
