@@ -29,6 +29,10 @@
         android:title="@string/service_refresh_title"/>
 
     <Preference
+        android:key="profile"
+        android:title="@string/profile"/>
+
+    <Preference
         android:key="pokemon_notification"
         android:summary="@string/pokemon_notification_summary"
         android:title="@string/pokemon_notification_title"/>

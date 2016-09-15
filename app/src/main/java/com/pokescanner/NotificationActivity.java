@@ -13,6 +13,7 @@ import android.widget.EditText;
 import com.pokescanner.helper.PokemonListLoader;
 import com.pokescanner.objects.NotificationItem;
 import com.pokescanner.recycler.NotificationRecyclerAdapter;
+import com.pokescanner.settings.Settings;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
     ArrayList<NotificationItem> notificationItems = new ArrayList<>();
     RecyclerView.Adapter mAdapter;
     Realm realm;
+    String profile;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,7 +48,13 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
         setContentView(R.layout.activity_filter);
         ButterKnife.bind(this);
 
+        Bundle extras = getIntent().getExtras();
+        if (extras != null){
+            profile = extras.getString("PROFILE");
+        }
         realm = Realm.getDefaultInstance();
+
+        profile = Settings.getPreferenceString(this, Settings.PROFILE);
 
         etSearch.addTextChangedListener(this);
 
@@ -108,7 +116,7 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
                         .findAll()
                         .sort("Number")));
                 for (NotificationItem notificationItem : notificationItems) {
-                    notificationItem.setNotification(false);
+                    notificationItem.removeProfile(NotificationActivity.this);
                 }
                 mAdapter.notifyDataSetChanged();
             }
@@ -125,7 +133,7 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
                         .findAll()
                         .sort("Number")));
                 for (NotificationItem notificationItem : notificationItems) {
-                    notificationItem.setNotification(true);
+                    notificationItem.addProfile(NotificationActivity.this);
                 }
                 mAdapter.notifyDataSetChanged();
             }

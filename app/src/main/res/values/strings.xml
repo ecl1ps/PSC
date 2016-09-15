@@ -196,7 +196,6 @@
     <string name="backup_write_permission">We need access to your file system in order to create the backup file</string>
 
 
-
     <string name="p1">Bulbasaur</string>
     <string name="p2">Ivysaur</string>
     <string name="p3">Venusaur</string>
@@ -392,4 +391,11 @@
     <string name="custom_location_invalid">No custom location set! Using current location.</string>
     <string name="hide_timer">Hide Timer</string>
     <string name="hide_timer_summary">Hides timer above icons on the map</string>
+    <string name="profiles">Profiles</string>
+    <string name="profile">Profile</string>
+    <string name="profile_summary">Default</string>
+    <string name="add_profile">Add Profile</string>
+    <string name="cannot_remove_profile">Can\'t remove profile</string>
+    <string name="need_one_profile">Need to keep at least one profile.</string>
+    <string name="profile_exists">Profile already exists</string>
 </resources>

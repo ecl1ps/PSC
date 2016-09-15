@@ -68,6 +68,9 @@
             android:name=".NotificationActivity"
             android:windowSoftInputMode="adjustPan|adjustResize"/>
         <activity
+            android:name=".profiles.ProfilesActivity"
+            android:windowSoftInputMode="adjustPan|adjustResize"/>
+        <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"/>
         <activity

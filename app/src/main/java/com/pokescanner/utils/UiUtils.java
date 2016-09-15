@@ -18,6 +18,9 @@ import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+
 import io.realm.Realm;
 
 import static com.pokescanner.helper.Generation.hexagonal_number;
@@ -77,13 +80,15 @@ public class UiUtils {
         return PokemonListLoader.getFilteredList().contains(new FilterItem(number));
     }
 
-    public static boolean isPokemonNotified(Pokemons pokemons) {
-        //lol this is really long but it's simple and to the point
-        return PokemonListLoader.getNotificationList().contains(new NotificationItem(pokemons.getNumber()));
-    }
-
-    public static boolean isPokemonNotified(int number) {
-        //lol this is really long but it's simple and to the point
-        return PokemonListLoader.getNotificationList().contains(new NotificationItem(number));
+    public static ArrayList<String> getAllProfiles(Context context){
+        LinkedHashSet<String> hashSet = new LinkedHashSet<>();
+        for (NotificationItem notificationItem : PokemonListLoader.getNotificationList()){
+            hashSet.addAll(notificationItem.getProfiles());
+        }
+        //In case the user hasn't added any pokemon to that profile yet
+        if (!hashSet.contains(Settings.getPreferenceString(context, Settings.PROFILE))){
+            hashSet.add(Settings.getPreferenceString(context, Settings.PROFILE));
+        }
+        return new ArrayList<>(hashSet);
     }
 }

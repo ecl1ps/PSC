@@ -21,7 +21,6 @@ import com.pokescanner.settings.Settings;
 public class NotificationViewHolder extends RecyclerView.ViewHolder {
     ImageView imageFilterRow;
     TextView pokemonName;
-    TextView tvStatus;
     CheckBox checkBox;
     Context context;
 
@@ -41,7 +40,7 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder {
         checkBox.setOnCheckedChangeListener(null);
 
         pokemonName.setText(notificationItem.getName());
-        checkBox.setChecked(notificationItem.isNotification());
+        checkBox.setChecked(notificationItem.isProfile(context));
 
         String uri;
         int pokemonnumber = notificationItem.getNumber();
@@ -59,7 +58,11 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder {
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                notificationItem.setNotification(b);
+                if (b){
+                    notificationItem.addProfile(context);
+                } else {
+                    notificationItem.removeProfile(context);
+                }
                 listener.onChecked(notificationItem);
             }
         });

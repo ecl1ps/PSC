@@ -53,7 +53,17 @@ public class PokemonListLoader {
         Realm realm = Realm.getDefaultInstance();
         ArrayList<NotificationItem> returnArray = new ArrayList<>(realm.copyFromRealm(
                 realm.where(NotificationItem.class)
-                        .equalTo("notification", true)
+                        .findAll()
+                        .sort("Number")));
+        realm.close();
+        return returnArray;
+    }
+
+    public static ArrayList<NotificationItem> getNotificationListForProfile(Context context) {
+        Realm realm = Realm.getDefaultInstance();
+        ArrayList<NotificationItem> returnArray = new ArrayList<>(realm.copyFromRealm(
+                realm.where(NotificationItem.class)
+                        .contains("profiles", Settings.getPreferenceString(context, Settings.PROFILE))
                         .findAll()
                         .sort("Number")));
         realm.close();

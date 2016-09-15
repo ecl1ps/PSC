@@ -39,6 +39,7 @@ import com.pokescanner.events.AppUpdateEvent;
 import com.pokescanner.objects.Gym;
 import com.pokescanner.objects.PokeStop;
 import com.pokescanner.objects.Pokemons;
+import com.pokescanner.profiles.ProfilesActivity;
 import com.pokescanner.service.PokeReceiver;
 import com.pokescanner.updater.AppUpdate;
 import com.pokescanner.updater.AppUpdateDialog;
@@ -66,6 +67,7 @@ public class SettingsFragment extends PreferenceFragment {
     Preference update;
     Preference serve_refresh_rate_dialog;
     Preference pokemon_notification;
+    Preference profile;
     ListPreference service_refresh_rate;
     SwitchPreference enable_service;
     Preference custom_location;
@@ -302,6 +304,16 @@ public class SettingsFragment extends PreferenceFragment {
                 return true;
             }
         });
+        profile = getPreferenceManager().findPreference("profile");
+        profile.setSummary(Settings.getPreferenceString(mContext, Settings.PROFILE));
+        profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(mContext, ProfilesActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        });
     }
 
     private void setupMapOptions() {
@@ -448,7 +460,7 @@ public class SettingsFragment extends PreferenceFragment {
 
         final EditText input = new EditText(getActivity());
 
-        input.setText(Settings.getPreferenceInt(mContext, Settings.SERVER_REFRESH_RATE));
+        input.setText(Settings.getPreferenceString(mContext, Settings.SERVER_REFRESH_RATE));
 
         input.setInputType(InputType.TYPE_CLASS_NUMBER);
         builder.setView(input);
@@ -511,6 +523,30 @@ public class SettingsFragment extends PreferenceFragment {
             if (frame != null) {
                 frame.setPadding(0, 0, 0, 0);
             }
+        }
+        if (getArguments() != null) {
+            String page = getArguments().getString("page");
+            if (page != null)
+                switch (page) {
+                    case "filterOptions":
+                        setupFilterOptions();
+                        break;
+                    case "notificationOptions":
+                        setupNotificationOptions();
+                        break;
+                    case "mapOptions":
+                        setupMapOptions();
+                        break;
+                    case "advancedMapOptions":
+                        setupAdvanceMapOptions();
+                        break;
+                    case "clearOptions":
+                        setupClearOptions();
+                        break;
+                    case "miscOptions":
+                        setupMiscOptions();
+                        break;
+                }
         }
     }
 }
