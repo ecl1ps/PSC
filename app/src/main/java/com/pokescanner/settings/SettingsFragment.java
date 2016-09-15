@@ -57,7 +57,10 @@ import static android.app.Activity.RESULT_OK;
 
 public class SettingsFragment extends PreferenceFragment {
     private static final int CUSTOM_LOCATION_REQUEST = 1111;
+    public static final int BACKGROUND_RADIUS = 0;
+    public static final int FOREGROUND_RADIUS = 1;
     Preference scan_dialog;
+    Preference background_scan_dialog;
     Preference gym_cp_filter;
     Preference expiration_filter;
     Preference clear_pokemon;
@@ -148,8 +151,13 @@ public class SettingsFragment extends PreferenceFragment {
         return rootView;
     }
 
-    public static void searchRadiusDialog(final Context context) {
-        int scanValue = Settings.getPreferenceInt(context, Settings.SCAN_VALUE);
+    public static void searchRadiusDialog(final Context context, final int type) {
+        int scanValue;
+        if (type == FOREGROUND_RADIUS) {
+            scanValue = Settings.getPreferenceInt(context, Settings.SCAN_VALUE);
+        } else {
+            scanValue = Settings.getPreferenceInt(context, Settings.BACKGROUND_SEARCH_RADIUS);
+        }
         final AppCompatDialog dialog = new AppCompatDialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_search_radius);
@@ -194,7 +202,11 @@ public class SettingsFragment extends PreferenceFragment {
             public void onClick(View view) {
                 int savedValue = seekBar.getProgress();
                 int scanOut = (savedValue == 0 ? 1 : savedValue);
-                Settings.setPreference(context, Settings.SCAN_VALUE, scanOut);
+                if(type == FOREGROUND_RADIUS){
+                    Settings.setPreference(context, Settings.SCAN_VALUE, scanOut);
+                } else {
+                    Settings.setPreference(context, Settings.BACKGROUND_SEARCH_RADIUS, scanOut);
+                }
                 dialog.dismiss();
             }
         });
@@ -314,13 +326,21 @@ public class SettingsFragment extends PreferenceFragment {
                 return true;
             }
         });
+
+        background_scan_dialog = getPreferenceManager().findPreference("backgroundSearchRadius");
+        background_scan_dialog.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            public boolean onPreferenceClick(Preference preference) {
+                SettingsFragment.searchRadiusDialog(mContext, BACKGROUND_RADIUS);
+                return true;
+            }
+        });
     }
 
     private void setupMapOptions() {
         scan_dialog = getPreferenceManager().findPreference("scan_dialog");
         scan_dialog.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
-                SettingsFragment.searchRadiusDialog(mContext);
+                SettingsFragment.searchRadiusDialog(mContext, FOREGROUND_RADIUS);
                 return true;
             }
         });

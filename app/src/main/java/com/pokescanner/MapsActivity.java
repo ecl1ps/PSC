@@ -287,7 +287,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @OnLongClick(R.id.btnSearch)
     public boolean onLongClickSearch() {
-        SettingsFragment.searchRadiusDialog(this);
+        SettingsFragment.searchRadiusDialog(this, SettingsFragment.FOREGROUND_RADIUS);
         return true;
     }
 

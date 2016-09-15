@@ -59,7 +59,12 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
         Fabric.with(this, new Crashlytics());
 
         int SERVER_REFRESH_RATE = Settings.getPreferenceInt(this, Settings.SERVER_REFRESH_RATE);
-        int scanValue = Settings.getPreferenceInt(this, Settings.SCAN_VALUE);
+        int scanValue;
+        if (Settings.getPreferenceBoolean(this, Settings.ENABLE_BACKGROUND_SEARCH_RADIUS)) {
+            scanValue = Settings.getPreferenceInt(this, Settings.BACKGROUND_SEARCH_RADIUS);
+        } else {
+            scanValue = Settings.getPreferenceInt(this, Settings.SCAN_VALUE);
+        }
         PokeNotifications.ongiongNotification(getString(R.string.scan_running) + " " + UiUtils.getSearchTimeString(scanValue, this), this);
 
         realm = Realm.getDefaultInstance();
@@ -155,7 +160,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
 
     public static void pokeNotification(Context context) {
         //Not sure if this will actually work
-        if (context == null){
+        if (context == null) {
             context = new PokeService();
         }
 
@@ -191,15 +196,15 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
             //Write distance to pokemons
             for (int i = 0; i < pokemon.size(); i++) {
                 Pokemons pokemons = pokemon.get(i);
-                    //DO MATH
-                    Location temp = new Location("");
+                //DO MATH
+                Location temp = new Location("");
 
-                    temp.setLatitude(pokemons.getLatitude());
-                    temp.setLongitude(pokemons.getLongitude());
+                temp.setLatitude(pokemons.getLatitude());
+                temp.setLongitude(pokemons.getLongitude());
 
-                    double distance = tempLocation.distanceTo(temp);
-                    pokemons.setDistance((int) Math.round(distance));
-                    pokemons.setBearing(getBearing(location, temp));
+                double distance = tempLocation.distanceTo(temp);
+                pokemons.setDistance((int) Math.round(distance));
+                pokemons.setBearing(getBearing(location, temp));
 
                 if (checkForMatch(context, pokemons)) {
                     //ADD OUR POKEMANS TO OUR OUT LIST
@@ -217,14 +222,14 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
         Log.d("POKE", "Found " + pokemonRecycler.size() + " pokemon");
     }
 
-    private static boolean checkForMatch(Context context, Pokemons pokemons){
-        for (NotificationItem item : PokemonListLoader.getNotificationListForProfile(context)){
-            if (item.getNumber() == pokemons.getNumber()){
+    private static boolean checkForMatch(Context context, Pokemons pokemons) {
+        for (NotificationItem item : PokemonListLoader.getNotificationListForProfile(context)) {
+            if (item.getNumber() == pokemons.getNumber()) {
                 return true;
             }
         }
-        for (NotificationItem item : PokemonListLoader.getCatchableNotificationList()){
-            if (pokemons.getDistance() <= 50 && item.getNumber() == pokemons.getNumber()){
+        for (NotificationItem item : PokemonListLoader.getCatchableNotificationList()) {
+            if (pokemons.getDistance() <= 50 && item.getNumber() == pokemons.getNumber()) {
                 return true;
             }
         }

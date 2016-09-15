@@ -239,7 +239,7 @@ public class DrivingModeActivity extends AppCompatActivity implements GoogleApiC
 
     @OnLongClick(R.id.btnAutoScan)
     public boolean onClickButton() {
-        SettingsFragment.searchRadiusDialog(this);
+        SettingsFragment.searchRadiusDialog(this, SettingsFragment.FOREGROUND_RADIUS);
         return true;
     }
 

@@ -51,6 +51,8 @@ public class Settings {
     public static final String NOTIFIED_ENCOUNTERS = "notifiedEncounters";
     public static final String HIDE_TIMER = "hideTimer";
     public static final String PROFILE = "profile";
+    public static final String ENABLE_BACKGROUND_SEARCH_RADIUS = "enableBackgroundSearchRadius";
+    public static final String BACKGROUND_SEARCH_RADIUS = "backgroundSearchRadius";
 
     private static final ArrayList<String> stringPrefs = new ArrayList<>(Arrays.asList(
             SERVER_REFRESH_RATE,
@@ -66,7 +68,8 @@ public class Settings {
     private static final ArrayList<String> intPrefs = new ArrayList<>(Arrays.asList(
             SCAN_VALUE,
             GUARD_MIN_CP,
-            GUARD_MAX_CP
+            GUARD_MAX_CP,
+            BACKGROUND_SEARCH_RADIUS
     ));
 
     // Settings default values
@@ -102,6 +105,8 @@ public class Settings {
     public static final String DEFAULT_notifiedEncounters = null;
     public static final boolean DEFAULT_hideTimer = false;
     public static final String DEFAULT_profile = "Default";
+    public static final boolean DEFAULT_enableBackgroundSearchRadius = false;
+    public static final int DEFAULT_backgroundSearchRadius = 4;
 
 
     public static SharedPreferences getPrefs(Context context) {

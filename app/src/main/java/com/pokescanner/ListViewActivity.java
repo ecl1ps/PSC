@@ -246,7 +246,7 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
 
     @OnLongClick(R.id.btnAutoScan)
     public boolean onClickButton() {
-        SettingsFragment.searchRadiusDialog(this);
+        SettingsFragment.searchRadiusDialog(this, SettingsFragment.FOREGROUND_RADIUS);
         return true;
     }
 
