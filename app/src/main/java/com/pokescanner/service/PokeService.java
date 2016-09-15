@@ -192,7 +192,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
             for (int i = 0; i < pokemon.size(); i++) {
                 Pokemons pokemons = pokemon.get(i);
 
-                if (checkForMath(context, pokemons)) {
+                if (checkForMatch(context, pokemons)) {
                     //DO MATH
                     Location temp = new Location("");
 
@@ -218,7 +218,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
         Log.d("POKE", "Found " + pokemonRecycler.size() + " pokemon");
     }
 
-    private static boolean checkForMath(Context context, Pokemons pokemons){
+    private static boolean checkForMatch(Context context, Pokemons pokemons){
         for (NotificationItem item : PokemonListLoader.getNotificationListForProfile(context)){
             if (item.getNumber() == pokemons.getNumber()){
                 return true;
