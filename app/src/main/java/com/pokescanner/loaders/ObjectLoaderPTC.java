@@ -46,6 +46,8 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
     private Realm realm;
     int position;
     Context context;
+    Exception e = null;
+
 
 
     public ObjectLoaderPTC(Context context, User user, List<LatLng> scanMap, int SLEEP_TIME, int pos) {
@@ -73,12 +75,7 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
                     EventBus.getDefault().post(new ForceLogoutEvent());
                 }
             } else {
-                try {
-                    provider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
-                }catch (RemoteServerException e){
-                    Thread.sleep(1000);
-                    provider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
-                }
+                provider = new PtcCredentialProvider(client, user.getUsername(), user.getPassword());
             }
             if (provider != null) {
                 go.login(provider);
@@ -113,21 +110,15 @@ public class ObjectLoaderPTC extends AsyncTask<Void, Void, Void> {
                     Thread.sleep(SLEEP_TIME);
                 }
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (RemoteServerException e) {
-            e.printStackTrace();
-        } catch (LoginFailedException e) {
-            e.printStackTrace();
-        } catch (AsyncPokemonGoException e) {
-            e.printStackTrace();
+        } catch (InterruptedException | RemoteServerException | LoginFailedException | AsyncPokemonGoException e) {
+            this.e = e;
         }
         return null;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        MultiAccountLoader.checkIfComplete(context);
+        MultiAccountLoader.checkIfComplete(context, e, position);
     }
 }
 

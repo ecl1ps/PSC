@@ -3,6 +3,7 @@ package com.pokescanner.loaders;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.TableRow;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.pokescanner.helper.MyPartition;
@@ -29,6 +30,7 @@ public class MultiAccountLoader {
     static private int SLEEP_TIME;
     static private ArrayList<ObjectLoaderPTC> tasks;
     static private boolean isBackground = false;
+    static private ArrayList<Integer> retryPosition = new ArrayList<>();
 
 
     static public void startThreads(Context context) {
@@ -72,16 +74,30 @@ public class MultiAccountLoader {
         MultiAccountLoader.isBackground = isBackground;
     }
 
-    static public void checkIfComplete(Context context) {
-        int counter = 1;
-        for (ObjectLoaderPTC objectLoaderPTC : tasks) {
-            if (objectLoaderPTC.getStatus() == AsyncTask.Status.FINISHED) {
-                counter++;
+    static public void checkIfComplete(Context context, Exception e, int position) {
+        if (e != null) {
+            retryPosition.add(position);
+        } else {
+            int counter = 1;
+            for (ObjectLoaderPTC objectLoaderPTC : tasks) {
+                if (objectLoaderPTC.getStatus() == AsyncTask.Status.FINISHED) {
+                    if (retryPosition.size() > 0) {
+                        if (retryPosition.contains(objectLoaderPTC.position)){
+                            continue;
+                        }
+                        int tempPosition = retryPosition.get(0);
+                        new ObjectLoaderPTC(context, objectLoaderPTC.user, scanMaps.get(tempPosition), SLEEP_TIME, tempPosition)
+                                .executeOnExecutor(THREAD_POOL_EXECUTOR);
+                        retryPosition.remove(0);
+                    } else {
+                        counter++;
+                    }
+                }
             }
-        }
-        if (counter == scanMaps.size()) {
-            if (isBackground) {
-                PokeService.pokeNotification(context);
+            if (counter == scanMaps.size()) {
+                if (isBackground) {
+                    PokeService.pokeNotification(context);
+                }
             }
         }
     }
@@ -101,9 +117,9 @@ public class MultiAccountLoader {
     private static final Executor THREAD_POOL_EXECUTOR;
 
     static {
-        //Disregard CPU cores and run as many threads as we want! ...well 30
+        //Disregard CPU cores and run as many threads as we want! ...well 15
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-                30, 30, 30, TimeUnit.SECONDS,
+                15, 15, 30, TimeUnit.SECONDS,
                 sPoolWorkQueue, sThreadFactory);
         threadPoolExecutor.allowCoreThreadTimeOut(true);
         THREAD_POOL_EXECUTOR = threadPoolExecutor;
@@ -127,5 +143,4 @@ public class MultiAccountLoader {
         }
         return false;
     }
-
 }
