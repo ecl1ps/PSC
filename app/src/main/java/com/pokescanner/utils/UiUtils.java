@@ -28,14 +28,15 @@ import static com.pokescanner.helper.Generation.hexagonal_number;
 
 public class UiUtils {
     public static final int BASE_DELAY = 1000;
+
     public static void hideKeyboard(EditText editText) {
         ((InputMethodManager) editText.getContext()
-            .getSystemService(Context.INPUT_METHOD_SERVICE))
-            .hideSoftInputFromWindow(editText.getWindowToken(), 0);
+                .getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 
     public static String getSearchTimeString(int val, Context context) {
-        if (Realm.getDefaultInstance().where(User.class).findAll().size() <= 0){
+        if (Realm.getDefaultInstance().where(User.class).findAll().size() <= 0) {
             return "99:99";
         }
         int serverRefreshValue = (BASE_DELAY * Settings.getPreferenceInt(context, Settings.SERVER_REFRESH_RATE));
@@ -56,7 +57,7 @@ public class UiUtils {
         return calculatedValue;
     }
 
-    public static boolean isPokemonExpiredFiltered(Pokemons pokemons,Context context) {
+    public static boolean isPokemonExpiredFiltered(Pokemons pokemons, Context context) {
         long millis = ExpirationFilter.getFilter(context).getPokemonExpirationMinSec() * BASE_DELAY;
         //Create a date from the expire time (Long value)
         DateTime date = new DateTime(pokemons.getExpires());
@@ -80,15 +81,14 @@ public class UiUtils {
         return PokemonListLoader.getFilteredList().contains(new FilterItem(number));
     }
 
-    public static ArrayList<String> getAllProfiles(Context context){
+    public static ArrayList<String> getAllProfiles(Context context) {
         LinkedHashSet<String> hashSet = new LinkedHashSet<>();
-        for (NotificationItem notificationItem : PokemonListLoader.getNotificationList()){
+        for (NotificationItem notificationItem : PokemonListLoader.getNotificationList()) {
             hashSet.addAll(notificationItem.getProfiles());
         }
         //In case the user hasn't added any pokemon to that profile yet
-        if (!hashSet.contains(Settings.getPreferenceString(context, Settings.PROFILE))){
-            hashSet.add(Settings.getPreferenceString(context, Settings.PROFILE));
-        }
+        hashSet.add(Settings.getPreferenceString(context, Settings.PROFILE));
+
         return new ArrayList<>(hashSet);
     }
 }
