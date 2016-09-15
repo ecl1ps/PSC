@@ -21,6 +21,13 @@
             android:layout_margin="20dp" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/catchable_summary"
+        android:id="@+id/tvCatchable"
+        android:layout_margin="20dp" />
+
     <EditText
         android:layout_width="250dp"
         android:layout_height="wrap_content"

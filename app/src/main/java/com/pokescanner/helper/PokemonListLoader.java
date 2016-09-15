@@ -70,6 +70,17 @@ public class PokemonListLoader {
         return returnArray;
     }
 
+    public static ArrayList<NotificationItem> getCatchableNotificationList() {
+        Realm realm = Realm.getDefaultInstance();
+        ArrayList<NotificationItem> returnArray = new ArrayList<>(realm.copyFromRealm(
+                realm.where(NotificationItem.class)
+                        .contains("profiles", "Catchable")
+                        .findAll()
+                        .sort("Number")));
+        realm.close();
+        return returnArray;
+    }
+
     public static void savePokeList(final ArrayList<FilterItem> pokelist) {
         Realm realm = Realm.getDefaultInstance();
         realm.executeTransaction(new Realm.Transaction() {

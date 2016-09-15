@@ -191,8 +191,6 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
             //Write distance to pokemons
             for (int i = 0; i < pokemon.size(); i++) {
                 Pokemons pokemons = pokemon.get(i);
-
-                if (checkForMatch(context, pokemons)) {
                     //DO MATH
                     Location temp = new Location("");
 
@@ -203,6 +201,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
                     pokemons.setDistance((int) Math.round(distance));
                     pokemons.setBearing(getBearing(location, temp));
 
+                if (checkForMatch(context, pokemons)) {
                     //ADD OUR POKEMANS TO OUR OUT LIST
                     pokemonRecycler.add(pokemons);
                 }
@@ -221,6 +220,11 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
     private static boolean checkForMatch(Context context, Pokemons pokemons){
         for (NotificationItem item : PokemonListLoader.getNotificationListForProfile(context)){
             if (item.getNumber() == pokemons.getNumber()){
+                return true;
+            }
+        }
+        for (NotificationItem item : PokemonListLoader.getCatchableNotificationList()){
+            if (pokemons.getDistance() <= 50 && item.getNumber() == pokemons.getNumber()){
                 return true;
             }
         }

@@ -398,4 +398,5 @@
     <string name="cannot_remove_profile">Can\'t remove profile</string>
     <string name="need_one_profile">Need to keep at least one profile.</string>
     <string name="profile_exists">Profile already exists</string>
+    <string name="catchable_summary">Add a profile named Catchable to be notified of those pokemon only when they are within encounter range. (50 meters)</string>
 </resources>
