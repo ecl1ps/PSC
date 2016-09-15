@@ -59,9 +59,9 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b){
-                    notificationItem.addProfile(context);
+                    notificationItem.addProfile(Settings.getPreferenceString(context, Settings.PROFILE));
                 } else {
-                    notificationItem.removeProfile(context);
+                    notificationItem.removeProfile(Settings.getPreferenceString(context, Settings.PROFILE));
                 }
                 listener.onChecked(notificationItem);
             }

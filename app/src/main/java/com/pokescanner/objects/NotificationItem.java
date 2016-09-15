@@ -72,15 +72,15 @@ public class NotificationItem extends RealmObject {
         this.profiles = sb.toString();
     }
 
-    public void addProfile(Context context) {
+    public void addProfile(String profile) {
         ArrayList<String> profiles = getProfiles();
-        profiles.add(Settings.getPreferenceString(context, Settings.PROFILE));
+        profiles.add(profile);
         setProfiles(profiles);
     }
 
-    public void removeProfile(Context context) {
+    public void removeProfile(String profile) {
         ArrayList<String> profiles = getProfiles();
-        profiles.remove(Settings.getPreferenceString(context, Settings.PROFILE));
+        profiles.remove(profile);
         setProfiles(profiles);
     }
 

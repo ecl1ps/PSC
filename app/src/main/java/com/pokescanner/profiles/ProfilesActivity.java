@@ -95,7 +95,7 @@ public class ProfilesActivity extends AppCompatActivity {
 
     }
 
-    private void removeProfile(String profile) {
+    private void removeProfile(final String profile) {
         if (profileList.size() <= 1) {
             final AlertDialog builder = new AlertDialog.Builder(this).create();
             builder.setTitle(getString(R.string.cannot_remove_profile));
@@ -108,11 +108,11 @@ public class ProfilesActivity extends AppCompatActivity {
             });
             builder.show();
         } else {
-            for (final NotificationItem item : PokemonListLoader.getNotificationListForProfile(ProfilesActivity.this)) {
+            for (final NotificationItem item : PokemonListLoader.getNotificationList()) {
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
-                        item.removeProfile(ProfilesActivity.this);
+                        item.removeProfile(profile);
                         realm.copyToRealmOrUpdate(item);
                     }
                 });
@@ -174,6 +174,7 @@ public class ProfilesActivity extends AppCompatActivity {
                     profileList.add(profile);
                     profileAdapter.notifyDataSetChanged();
                     builder.dismiss();
+                    startActivity(new Intent(ProfilesActivity.this, NotificationActivity.class));
                 }
             }
         });

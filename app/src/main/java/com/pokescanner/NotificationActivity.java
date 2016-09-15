@@ -49,9 +49,6 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
         ButterKnife.bind(this);
 
         Bundle extras = getIntent().getExtras();
-        if (extras != null){
-            profile = extras.getString("PROFILE");
-        }
         realm = Realm.getDefaultInstance();
 
         profile = Settings.getPreferenceString(this, Settings.PROFILE);
@@ -116,7 +113,7 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
                         .findAll()
                         .sort("Number")));
                 for (NotificationItem notificationItem : notificationItems) {
-                    notificationItem.removeProfile(NotificationActivity.this);
+                    notificationItem.removeProfile(profile);
                 }
                 mAdapter.notifyDataSetChanged();
             }
@@ -133,7 +130,7 @@ public class NotificationActivity extends AppCompatActivity implements TextWatch
                         .findAll()
                         .sort("Number")));
                 for (NotificationItem notificationItem : notificationItems) {
-                    notificationItem.addProfile(NotificationActivity.this);
+                    notificationItem.addProfile(profile);
                 }
                 mAdapter.notifyDataSetChanged();
             }
