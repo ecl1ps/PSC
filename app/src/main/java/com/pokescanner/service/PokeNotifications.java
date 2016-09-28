@@ -67,6 +67,9 @@ public class PokeNotifications {
     private static void singlePokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
         NotificationCompat.Builder builder = setupNotification(context);
         for (Pokemons pokemon : pokemonRecycler) {
+            if (pokemon.isExpired())
+                continue;
+
             builder.setContentTitle(pokemon.getFormalName(context))
                     .setContentText(String.format(Locale.getDefault(), "%3dm %-9s expires in %s",
                             pokemon.getDistance(),
@@ -82,6 +85,9 @@ public class PokeNotifications {
     private static void groupPokeNotification(Context context, ArrayList<Pokemons> pokemonRecycler) {
         NotificationCompat.Builder builder = setupNotification(context);
         for (Pokemons pokemon : pokemonRecycler) {
+            if (pokemon.isExpired())
+                continue;
+
             builder.setContentTitle(pokemon.getFormalName(context))
                     .setContentText(String.format(Locale.getDefault(), "%3dm %-9s expires in %s",
                             pokemon.getDistance(),
@@ -107,6 +113,9 @@ public class PokeNotifications {
         StringBuilder sb = new StringBuilder();
         String newline = "";
         for (Pokemons pokemon : pokemonRecycler) {
+            if (pokemon.isExpired())
+                continue;
+
             sb.append(newline)
                     .append(String.format("%s %dm  %s  expires in %s",
                             pokemon.getFormalName(context),

@@ -178,7 +178,7 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
             //Put our pokemon inside an object
             Pokemons temp = pokemon.get(i);
             //Now we check has it expired
-            if (!temp.isExpired()) {
+            if (temp.isExpired()) {
                 //If it has lets removed the pokemon
                 realm.beginTransaction();
                 realm.where(Pokemons.class).equalTo("encounterid", temp.getEncounterid()).findAll().deleteAllFromRealm();
@@ -216,7 +216,8 @@ public class PokeService extends IntentService implements GoogleApiClient.Connec
         if (pokemonRecycler.size() > 0) {
             Collections.sort(pokemonRecycler, new PokeDistanceSorter());
             removeAlreadyNotified(context, pokemonRecycler);
-            PokeNotifications.pokeNotification(context, pokemonRecycler);
+            if (pokemonRecycler.size() > 0)
+                PokeNotifications.pokeNotification(context, pokemonRecycler);
         }
 
         Log.d("POKE", "Found " + pokemonRecycler.size() + " pokemon");

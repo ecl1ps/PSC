@@ -59,8 +59,8 @@ public class Pokemons  extends RealmObject{
     public boolean isExpired() {
         //Create a date
         DateTime expires = new DateTime(getExpires());
-        //If this date is after the current time then it has not expired!
-        return expires.isAfter(new Instant());
+        //If this date is before the current time then it has expired!
+        return expires.isBefore(new Instant());
     }
 
     public MarkerOptions getMarker(Context context) {

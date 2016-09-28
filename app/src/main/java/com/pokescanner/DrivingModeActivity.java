@@ -161,7 +161,7 @@ public class DrivingModeActivity extends AppCompatActivity implements GoogleApiC
                 if (curScreen.contains(new LatLng(pokemon.getLatitude(), pokemon.getLongitude()))) {
                     //If yes then has he expired?
                     //This isnt worded right it should say isNotExpired (Will fix later)
-                    if (pokemon.isExpired()) {
+                    if (!pokemon.isExpired()) {
                         if (UiUtils.isPokemonFiltered(pokemon) ||
                                 UiUtils.isPokemonExpiredFiltered(pokemon, this)) {
                             if (pokemonsMarkerMap.containsKey(pokemon)) {

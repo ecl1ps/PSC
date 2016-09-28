@@ -131,7 +131,7 @@ public class ListViewActivity extends AppCompatActivity implements GoogleApiClie
             //Put our pokemon inside an object
             Pokemons temp = pokemon.get(i);
             //Now we check has it expired
-            if (!temp.isExpired()) {
+            if (temp.isExpired()) {
                 //If it has lets removed the pokemon
                 realm.beginTransaction();
                 realm.where(Pokemons.class).equalTo("encounterid",temp.getEncounterid()).findAll().deleteAllFromRealm();
