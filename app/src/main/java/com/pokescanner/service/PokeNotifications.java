@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
 import com.pokescanner.MapsActivity;
@@ -123,7 +124,7 @@ public class PokeNotifications {
         PendingIntent pendingIntentOpenApp = PendingIntent.getActivity(context, 0, new Intent(context, MapsActivity.class), 0);
         long[] vibrate = {0, 400};
         return new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.icon)
+                .setSmallIcon(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ? R.drawable.icon : R.drawable.icon_silhouette)
                 .setContentIntent(pendingIntentOpenApp)
                 .setSound(Uri.parse(Settings.getPreferenceString(context, Settings.NOTIFICATION_RINGTONE)))
                 .setVibrate(Settings.getPreferenceBoolean(context, Settings.NOTIFICATION_VIBRATE) ? vibrate : new long[]{0});
@@ -132,7 +133,7 @@ public class PokeNotifications {
     private static NotificationCompat.Builder setupSilentNotification(Context context) {
         PendingIntent pendingIntentOpenApp = PendingIntent.getActivity(context, 0, new Intent(context, MapsActivity.class), 0);
         return new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.icon)
+                .setSmallIcon(android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ? R.drawable.icon : R.drawable.icon_silhouette)
                 .setContentIntent(pendingIntentOpenApp);
     }
 
