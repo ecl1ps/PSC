@@ -47,10 +47,9 @@ public class PokeNotifications {
         NotificationCompat.Builder builder = setupSilentNotification(context)
                 .addAction(new NotificationCompat.Action(R.drawable.ic_close_white_24dp, "Cancel Service", pendingIntentStop))
                 .addAction(new NotificationCompat.Action(R.drawable.ic_refresh_white_36dp, "Rescan", pendingIntentRescan))
-                .setContentTitle("Poke Scanner")
+                .setContentTitle("Scanner")
                 .setContentText(content)
                 .setOngoing(true)
-                .setPriority(Notification.PRIORITY_MIN)
                 .setGroup(ONGOING_GROUP);
 
         notify(context, ONGOING_ID, builder);
